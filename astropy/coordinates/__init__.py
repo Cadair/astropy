@@ -20,13 +20,6 @@ __doc__ += builtin_systems._transform_graph_docs
 """
 TODO list for "round 2" of coordinates (i.e. v0.3):
 
-* Make current classes ("low-level" classes in scheme below) support arrays
-  by making `Angle` into a `Quantity` (#1006) and fixing up the interfaces
-  in the low-level classes.
-* Rework the transformation infrastructure to be array-compatible
-  best approach is probably @taldcroft's suggestion from `Time` to always
-  use 1D arrays as the internal representation, and reshape as needed at the
-  beginning and end.
 * Change (if necessary?) low-level classes and transform functions so
   that ``Xxx.to(Yyy, **kwargs)`` always allows initializes `Yyy` with
   `kwargs`, and the transformation function also gets a copy of `kwargs`
