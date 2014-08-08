@@ -29,6 +29,7 @@ environment:
 
 platform:
     -x64
+    -x86
 
 install:
     # Install miniconda using a powershell script.
