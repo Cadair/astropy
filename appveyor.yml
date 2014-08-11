@@ -6,6 +6,7 @@ environment:
   global:
       PYTHON: "C:\\conda"
       MINICONDA_VERSION: "3.5.5"
+      CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\.run_with_env.cmd"
 
   matrix:
       - PYTHON_VERSION: "2.6"
@@ -47,7 +48,7 @@ install:
 
     # Install all of SunPy's dependancies that are conda packages
     # Install build deps for SunPy's ANA
-    - "conda install -q --yes pip mingw libpython"
+    - "conda install -q --yes pip"
     # Install specified version of numpy
     - "conda install -q --yes numpy=%NUMPY_VERSION%"
     # Install non-optional deps
@@ -59,5 +60,5 @@ install:
 build: false
 
 test_script:
-  - "python setup.py test"
+  - "%CMD_IN_ENV% python setup.py test"
 
