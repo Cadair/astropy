@@ -9,24 +9,12 @@ environment:
       CMD_IN_ENV: "cmd /E:ON /V:ON /C .\\.run_with_env.cmd"
 
   matrix:
-      # - PYTHON_VERSION: "2.6"
-      #   NUMPY_VERSION: "1.8.1"
-        
-      # - PYTHON_VERSION: "2.6"
-      #   NUMPY_VERSION: "1.7.1"
-      
+      # Limit number of test cases because appveyor tests are long
       - PYTHON_VERSION: "2.7"
         NUMPY_VERSION: "1.8.1"
-        
-      # - PYTHON_VERSION: "2.7"
-      #   NUMPY_VERSION: "1.7.1"
-      
-#      - PYTHON_VERSION: "3.4"
-#        NUMPY_VERSION: "1.8.1"
-#
-# There is no conda package for Numpy 1.7.1 on 3.4.
-#      - PYTHON_VERSION: "3.4"
-#        NUMPY_VERSION: "1.7.1"
+
+     - PYTHON_VERSION: "3.4"
+       NUMPY_VERSION: "1.8.1"
 
 platform:
     - x64
