@@ -42,7 +42,7 @@ install:
     # Install non-optional deps
     - "conda install -q --yes pytest Cython"
     # Install optional deps
-    - "conda install -q --yes scipy h5py beautiful-soup"
+    - "conda install -q --yes scipy h5py beautiful-soup lxml"
 
 # Not a .NET project, we build SunPy in the install step instead
 build: false
