@@ -167,6 +167,9 @@ New Features
   - ``all_world2pix`` now uses a much more sophisticated and complete
     algorithm to iteratively compute the inverse WCS transform. [#2816]
 
+  - Added units.quantity_input decorator to validate quantity inputs to a 
+    function for unit compatibility. [#3072]
+
 API Changes
 ^^^^^^^^^^^
 
