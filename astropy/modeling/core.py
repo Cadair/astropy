@@ -2878,11 +2878,6 @@ class _CompoundModel(Model, metaclass=_CompoundModelMeta):
     def evaluate(self, *args):
         return self.__class__.evaluate(*args)
 
-    # @property
-    # def input_units(cls):
-    #
-
-
     # TODO: The way this works is highly inefficient--the inverse is created by
     # making a new model for each operator in the compound model, which could
     # potentially mean creating a large number of temporary throwaway model
