@@ -212,7 +212,7 @@ def test_plus_input_units():
 
     out = cs(10*u.arcsecond)
 
-    assert_quantity_allclose(out, 20*u.deg + 10*u.arcsec)
+    assert_quantity_allclose(out, 20*u.deg + 20*u.arcsec)
 
 def test_compound_input_units():
     """
