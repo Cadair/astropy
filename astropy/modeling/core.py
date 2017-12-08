@@ -1141,7 +1141,7 @@ class Model(metaclass=_ModelMeta):
         units for each parameter.
         """
 
-        model = self.copy()
+        model = self.deepcopy()
 
         inputs_unit = {inp: getattr(kwargs[inp], 'unit', dimensionless_unscaled)
                        for inp in self.inputs if kwargs[inp] is not None}
@@ -1183,7 +1183,7 @@ class Model(metaclass=_ModelMeta):
         units for each parameter.
         """
 
-        model = self.copy()
+        model = self.deepcopy()
 
         inputs_unit = {inp: getattr(kwargs[inp], 'unit', dimensionless_unscaled)
                        for inp in self.inputs if kwargs[inp] is not None}
@@ -1446,6 +1446,7 @@ class Model(metaclass=_ModelMeta):
         inputs = list(inputs)
 
         # Check that the units are correct, if applicable
+        print(self, self.input_units, getattr(self, '_is_unitless_copy', None))
 
         if self.input_units is not None:
 
@@ -2785,6 +2786,9 @@ class _CompoundModel(Model, metaclass=_CompoundModelMeta):
 
     _submodels = None
 
+    # This is used when fitting to return a copy that thinks it has no units.
+    _is_unitless_copy = False
+
     def __str__(self):
         expression = self._format_expression()
         components = self._format_components()
@@ -2796,6 +2800,9 @@ class _CompoundModel(Model, metaclass=_CompoundModelMeta):
 
 
     def _generate_input_output_units_dict(self, mapping, attr):
+        if self._is_unitless_copy:
+            return
+
         d = {}
         for inp, (model, orig_inp) in mapping.items():
             mattr = getattr(model, attr)
@@ -2920,6 +2927,28 @@ class _CompoundModel(Model, metaclass=_CompoundModelMeta):
     @sharedmethod
     def _get_submodels(self):
         return self.__class__._get_submodels()
+
+    def without_units_for_data(self, **kwargs):
+        __doc__ = super().__doc__
+
+        model = super().without_units_for_data(**kwargs)
+
+        model._submodels = [sm.without_units_for_data(**kwargs) for sm in model._submodels]
+
+        model._is_unitless_copy = True
+
+        return model
+
+    def with_units_from_data(self, **kwargs):
+        __doc__ = super().__doc__
+
+        model = super().with_units_from_data(**kwargs)
+
+        model._submodels = [sm.with_units_from_data(**kwargs) for sm in model._submodels]
+
+        model._is_unitless_copy = True
+
+        return model
 
     def _parameter_units_for_data_units(self, input_units, output_units):
         units_for_data = {}
