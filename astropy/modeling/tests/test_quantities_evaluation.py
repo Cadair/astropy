@@ -240,7 +240,7 @@ def test_compound_input_units_fail():
         cs(10*u.pix)
 
 
-def test_compound_compound_units_fail():
+def test_compound_incompatible_units_fail():
     """
     Test incompatible model units in chain.
     """
@@ -253,7 +253,7 @@ def test_compound_compound_units_fail():
         cs(10*u.pix)
 
 
-def test_compound_compound_equiv_call():
+def test_compound_pipe_equiv_call():
     """
     Test incompatible model units in chain.
     """
@@ -264,6 +264,21 @@ def test_compound_compound_equiv_call():
 
     out = cs(10*u.pix, equivalencies={'x': u.pixel_scale(0.5*u.deg/u.pix)})
     assert_quantity_allclose(out, 25*u.deg)
+
+
+def test_compound_and_equiv_call():
+    """
+    Test incompatible model units in chain.
+    """
+    s1 = Shift(10*u.deg)
+    s2 = Shift(10*u.deg)
+
+    cs = s1 & s2
+
+    out = cs(10*u.pix, 10*u.pix, equivalencies={'x': u.pixel_scale(0.5*u.deg/u.pix),
+                                                'y': u.pixel_scale(0.5*u.deg/u.pix)})
+    assert_quantity_allclose(out[0], 25*u.deg)
+    assert_quantity_allclose(out[1], 25*u.deg)
 
 
 def test_compound_compound_equiv_class():
