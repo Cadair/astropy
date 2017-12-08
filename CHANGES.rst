@@ -397,6 +397,19 @@ Other Changes and Additions
 - The guide to setting up Emacs for code development was simplified, and
   updated to recommend ``flycheck`` and ``flake8`` for syntax checks. [#6692]
 
+2.0.4 (unreleased)
+==================
+
+Bug Fixes
+---------
+
+astropy.modeling
+^^^^^^^^^^^^^^^^
+
+- Fixed the evaluation of compound models with units. This required adding
+  the ability to have ``input_units_strict`` and ``input_units_allow_dimensionless``
+  be dictionaries with input names as keys. [#6952]
+
 2.0.3 (unreleased)
 ==================
 
