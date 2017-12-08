@@ -985,7 +985,7 @@ class Model(metaclass=_ModelMeta):
 
     @property
     def bounding_box(self):
-        r"""
+        """
         A `tuple` of length `n_inputs` defining the bounding box limits, or
         `None` for no bounding box.
 
@@ -1440,6 +1440,8 @@ class Model(metaclass=_ModelMeta):
 
     def _validate_input_units(self, inputs, equivalencies=None):
 
+        print("VALIDATE UNITS", inputs, equivalencies, self.input_units)
+
         inputs = list(inputs)
 
         # Check that the units are correct, if applicable
@@ -1510,6 +1512,8 @@ class Model(metaclass=_ModelMeta):
                                              "converted to required input units of "
                                              "{1} ({2})".format(self.inputs[i], input_unit,
                                                                 input_unit.physical_type))
+
+        print("OUT", inputs)
 
         return inputs
 
@@ -2719,11 +2723,11 @@ class _CompoundModelMeta(_ModelMeta):
             evaluate = model.evaluate
             if n_outputs == 1:
                 def f(inputs, params):
-                    model._validate_input_units(inputs)
+                    inputs = model._validate_input_units(inputs)
                     return (evaluate(*inputs, *islice(params, n_params)),)
             else:
                 def f(inputs, params):
-                    model._validate_input_units(inputs)
+                    inputs = model._validate_input_units(inputs)
                     return evaluate(*inputs, *islice(params, n_params))
         else:
             if n_outputs == 1:
@@ -2731,13 +2735,13 @@ class _CompoundModelMeta(_ModelMeta):
                 def f(inputs, params):
                     param_values = tuple(islice(params, n_params))
                     m = model(*param_values)
-                    m._validate_input_units(inputs)
+                    inputs = m._validate_input_units(inputs)
                     return (m.evaluate(*chain(inputs, param_values)),)
             else:
                 def f(inputs, params):
                     param_values = tuple(islice(params, n_params))
                     m = model(*param_values)
-                    m._validate_input_units(inputs)
+                    inputs = m._validate_input_units(inputs)
                     return m.evaluate(*chain(inputs, param_values))
 
         return (f, n_inputs, n_outputs)
