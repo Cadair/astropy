@@ -441,7 +441,7 @@ def test_compound_return_units():
             """ Output units. """
             return {'x': u.deg, 'y': u.deg}
 
-        def evaluate(x, y):
+        def evaluate(self, x, y):
             return x.value, y.value
 
 
