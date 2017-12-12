@@ -124,6 +124,13 @@ class _ModelMeta(OrderedDescriptorContainer, InheritDocstrings, abc.ABCMeta):
         cls._create_inverse_property(members)
         cls._create_bounding_box_property(members)
         cls._handle_special_methods(members)
+        #if 'inputs' in members and isinstance(cls.input_units_strict, bool):
+            #inp = members['inputs']
+            #if isinstance(inp, tuple) and inp:
+                #print('members,', name, inp, cls.input_units_strict)
+                #cls.input_units_strict = {key: cls.input_units_strict for key in inp}
+
+
 
     def __repr__(cls):
         """
@@ -656,7 +663,7 @@ class Model(metaclass=_ModelMeta):
     # input_units. In this case, if the input quantities are convertible to
     # input_units, they are converted. If this is a dictionary then it should
     # map input name to a bool to set strict input units for that parameter.
-    input_units_strict = False
+    input_units_strict = False #{key: False for key in inputs}
 
     # Allow dimensionless input (and corresponding output). If this is True,
     # input values to evaluate will gain the units specified in input_units. If
@@ -681,6 +688,10 @@ class Model(metaclass=_ModelMeta):
         # Parameter values must be passed in as keyword arguments in order to
         # distinguish them
         self._initialize_parameters(args, kwargs)
+        ius = self.input_units_strict
+        #if not ius:
+        if isinstance(ius, bool):
+            self.input_units_strict = {key: ius for key in self.__class__.inputs}
 
     def __repr__(self):
         return self._format_repr()
@@ -1487,15 +1498,15 @@ class Model(metaclass=_ModelMeta):
                         # to be able to raise more appropriate/nicer exceptions
 
                         if input_unit is dimensionless_unscaled:
-                            raise UnitsError("Units of input '{0}', {1} ({2}), could not be "
+                            raise UnitsError("{0}: Units of input '{1}', {2} ({3}), could not be "
                                              "converted to required dimensionless "
                                              "input".format(self.inputs[i],
                                                             inputs[i].unit,
                                                             inputs[i].unit.physical_type))
                         else:
-                            raise UnitsError("Units of input '{0}', {1} ({2}), could not be "
+                            raise UnitsError("{0}: Units of input '{1}', {2} ({3}), could not be "
                                              "converted to required input units of "
-                                             "{3} ({4})".format(self.inputs[i],
+                                             "{4} ({5})".format(self.name, self.inputs[i],
                                                                 inputs[i].unit,
                                                                 inputs[i].unit.physical_type,
                                                                 input_unit,
