@@ -651,8 +651,8 @@ class Model(metaclass=_ModelMeta):
     # model hasn't completed initialization yet
     _n_models = 1
 
-    # New classes can set thi sas a boolean value.
-    # It is turned into a dictionary mapping input name to a boolean.
+    # New classes can set this as a boolean value.
+    # It is converted to a dictionary mapping input name to a boolean value.
     _input_units_strict = False
 
     # Allow dimensionless input (and corresponding output). If this is True,
