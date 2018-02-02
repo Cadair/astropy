@@ -514,17 +514,6 @@ class Scale(Fittable1DModel):
     linear = True
     fittable = True
 
-    _input_units_strict = True
-
-    _input_units_allow_dimensionless = True
-
-    @property
-    def input_units(self):
-        if self.factor.unit is None:
-            return None
-        else:
-            return {'x': self.factor.unit}
-
     @property
     def inverse(self):
         """One dimensional inverse Scale model function"""
