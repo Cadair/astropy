@@ -97,21 +97,24 @@ def select_step_scalar(dv):
 
 def get_coord_meta(frame):
 
-    coord_meta = {}
-    coord_meta['type'] = ('longitude', 'latitude')
-    coord_meta['wrap'] = (None, None)
-    coord_meta['unit'] = (u.deg, u.deg)
-
-    from astropy.coordinates import frame_transform_graph
-
     if isinstance(frame, str):
+        from astropy.coordinates import frame_transform_graph
+
         initial_frame = frame
         frame = frame_transform_graph.lookup_name(frame)
         if frame is None:
             raise ValueError("Unknown frame: {0}".format(initial_frame))
 
+    if hasattr(frame, '__wcsaxes_coord_meta__'):
+        return frame.__wcsaxes_coord_meta__
+
     if not isinstance(frame, BaseCoordinateFrame):
         frame = frame()
+
+    coord_meta = {}
+    coord_meta['type'] = ('longitude', 'latitude')
+    coord_meta['wrap'] = (None, None)
+    coord_meta['unit'] = (u.deg, u.deg)
 
     names = list(frame.representation_component_names.keys())
     coord_meta['name'] = names[:2]

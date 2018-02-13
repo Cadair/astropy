@@ -25,6 +25,7 @@ from ..utils.misc import InheritDocstrings
 from ..utils.compat import NUMPY_LT_1_12, NUMPY_LT_1_14
 
 __all__ = ["BaseRepresentationOrDifferential", "BaseRepresentation",
+           "BaseSphericalRepresentation",
            "CartesianRepresentation", "SphericalRepresentation",
            "UnitSphericalRepresentation", "RadialRepresentation",
            "PhysicsSphericalRepresentation", "CylindricalRepresentation",
@@ -1239,7 +1240,90 @@ class CartesianRepresentation(BaseRepresentation):
                               self.x * other_c.y - self.y * other_c.x)
 
 
-class UnitSphericalRepresentation(BaseRepresentation):
+class RadialRepresentation(BaseRepresentation):
+    """
+    Representation of the distance of points from the origin.
+
+    Note that this is mostly intended as an internal helper representation.
+    It can do little else but being used as a scale in multiplication.
+
+    Parameters
+    ----------
+    distance : `~astropy.units.Quantity`
+        The distance of the point(s) from the origin.
+
+    differentials : dict, `BaseDifferential`, optional
+        Any differential classes that should be associated with this
+        representation. The input must either be a single `BaseDifferential`
+        instance (see `._compatible_differentials` for valid types), or a
+        dictionary of of differential instances with keys set to a string
+        representation of the SI unit with which the differential (derivative)
+        is taken. For example, for a velocity differential on a positional
+        representation, the key would be ``'s'`` for seconds, indicating that
+        the derivative is a time derivative.
+
+    copy : bool, optional
+        If `True` (default), arrays will be copied rather than referenced.
+    """
+
+    attr_classes = OrderedDict([('distance', u.Quantity)])
+
+    def __init__(self, distance, differentials=None, copy=True):
+        super().__init__(distance, copy=copy, differentials=differentials)
+
+    @property
+    def distance(self):
+        """
+        The distance from the origin to the point(s).
+        """
+        return self._distance
+
+    def unit_vectors(self):
+        """Cartesian unit vectors are undefined for radial representation."""
+        raise NotImplementedError('Cartesian unit vectors are undefined for '
+                                  '{0} instances'.format(self.__class__))
+
+    def scale_factors(self):
+        l = np.broadcast_to(1.*u.one, self.shape, subok=True)
+        return OrderedDict((('distance', l),))
+
+    def to_cartesian(self):
+        """Cannot convert radial representation to cartesian."""
+        raise NotImplementedError('cannot convert {0} instance to cartesian.'
+                                  .format(self.__class__))
+
+    @classmethod
+    def from_cartesian(cls, cart):
+        """
+        Converts 3D rectangular cartesian coordinates to radial coordinate.
+        """
+        return cls(distance=cart.norm(), copy=False)
+
+    def _scale_operation(self, op, *args):
+        self._raise_if_has_differentials(op.__name__)
+        return op(self.distance, *args)
+
+    def norm(self):
+        """Vector norm.
+
+        Just the distance itself.
+
+        Returns
+        -------
+        norm : `~astropy.units.Quantity`
+            Dimensionless ones, with the same shape as the representation.
+        """
+        return self.distance
+
+    def _combine_operation(self, op, other, reverse=False):
+        return NotImplemented
+
+
+class BaseSphericalRepresentation(BaseRepresentation):
+    attr_classes = OrderedDict()
+
+
+class UnitSphericalRepresentation(BaseSphericalRepresentation):
     """
     Representation of points on a unit sphere.
 
@@ -1442,86 +1526,7 @@ class UnitSphericalRepresentation(BaseRepresentation):
             self.to_cartesian().cross(other))
 
 
-class RadialRepresentation(BaseRepresentation):
-    """
-    Representation of the distance of points from the origin.
-
-    Note that this is mostly intended as an internal helper representation.
-    It can do little else but being used as a scale in multiplication.
-
-    Parameters
-    ----------
-    distance : `~astropy.units.Quantity`
-        The distance of the point(s) from the origin.
-
-    differentials : dict, `BaseDifferential`, optional
-        Any differential classes that should be associated with this
-        representation. The input must either be a single `BaseDifferential`
-        instance (see `._compatible_differentials` for valid types), or a
-        dictionary of of differential instances with keys set to a string
-        representation of the SI unit with which the differential (derivative)
-        is taken. For example, for a velocity differential on a positional
-        representation, the key would be ``'s'`` for seconds, indicating that
-        the derivative is a time derivative.
-
-    copy : bool, optional
-        If `True` (default), arrays will be copied rather than referenced.
-    """
-
-    attr_classes = OrderedDict([('distance', u.Quantity)])
-
-    def __init__(self, distance, differentials=None, copy=True):
-        super().__init__(distance, copy=copy, differentials=differentials)
-
-    @property
-    def distance(self):
-        """
-        The distance from the origin to the point(s).
-        """
-        return self._distance
-
-    def unit_vectors(self):
-        """Cartesian unit vectors are undefined for radial representation."""
-        raise NotImplementedError('Cartesian unit vectors are undefined for '
-                                  '{0} instances'.format(self.__class__))
-
-    def scale_factors(self):
-        l = np.broadcast_to(1.*u.one, self.shape, subok=True)
-        return OrderedDict((('distance', l),))
-
-    def to_cartesian(self):
-        """Cannot convert radial representation to cartesian."""
-        raise NotImplementedError('cannot convert {0} instance to cartesian.'
-                                  .format(self.__class__))
-
-    @classmethod
-    def from_cartesian(cls, cart):
-        """
-        Converts 3D rectangular cartesian coordinates to radial coordinate.
-        """
-        return cls(distance=cart.norm(), copy=False)
-
-    def _scale_operation(self, op, *args):
-        self._raise_if_has_differentials(op.__name__)
-        return op(self.distance, *args)
-
-    def norm(self):
-        """Vector norm.
-
-        Just the distance itself.
-
-        Returns
-        -------
-        norm : `~astropy.units.Quantity`
-            Dimensionless ones, with the same shape as the representation.
-        """
-        return self.distance
-
-    def _combine_operation(self, op, other, reverse=False):
-        return NotImplemented
-
-
-class SphericalRepresentation(BaseRepresentation):
+class SphericalRepresentation(BaseSphericalRepresentation):
     """
     Representation of points in 3D spherical coordinates.
 
@@ -1671,7 +1676,7 @@ class SphericalRepresentation(BaseRepresentation):
         return np.abs(self.distance)
 
 
-class PhysicsSphericalRepresentation(BaseRepresentation):
+class PhysicsSphericalRepresentation(BaseSphericalRepresentation):
     """
     Representation of points in 3D spherical coordinates (using the physics
     convention of using ``phi`` and ``theta`` for azimuth and inclination

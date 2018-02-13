@@ -17,6 +17,7 @@ from ... import units as u
 from ...wcs import WCS
 from ...wcs.utils import wcs_to_celestial_frame
 from ...coordinates import (SkyCoord, frame_transform_graph,
+                            BaseSphericalRepresentation,
                             SphericalRepresentation,
                             UnitSphericalRepresentation,
                             BaseCoordinateFrame)
@@ -253,7 +254,15 @@ class CoordinateTransform(CurvedTransform):
         input_coords = input_coords*u.deg
         x_in, y_in = input_coords[:, 0], input_coords[:, 1]
 
-        c_in = SkyCoord(UnitSphericalRepresentation(x_in, y_in),
+        if (issubclass(self.input_system._default_representation, BaseSphericalRepresentation) and
+            hasattr(self.input_system._default_representation, '_unit_representation')):
+
+            preferred_spherical = self.input_system._default_representation
+            preferred_spherical = preferred_spherical._unit_representation
+        else:
+            preferred_spherical = UnitSphericalRepresentation
+
+        c_in = SkyCoord(preferred_spherical(x_in, y_in),
                         frame=self.input_system)
 
         # We often need to transform arrays that contain NaN values, and filtering
@@ -262,7 +271,8 @@ class CoordinateTransform(CurvedTransform):
         with np.errstate(all='ignore'):
             c_out = c_in.transform_to(self.output_system)
 
-        if issubclass(c_out.representation, (SphericalRepresentation, UnitSphericalRepresentation)):
+        # PhysicsSphericalRepresentation will break this
+        if issubclass(c_out.representation_type, BaseSphericalRepresentation):
             lon = c_out.data.lon.deg
             lat = c_out.data.lat.deg
         else:
