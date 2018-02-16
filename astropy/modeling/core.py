@@ -697,6 +697,13 @@ class Model(metaclass=_ModelMeta):
         inputs_are_quantity = any([isinstance(i, Quantity) for i in inputs])
 
         parameters = self._param_sets(raw=True, units=True)
+
+        param_units = [getattr(p, 'unit', None) for p in parameters]
+        if any(param_units) and not all(param_units):
+            for i in range(parameters.size):
+                if not hasattr(parameters[i], 'unit'):
+                    parameters[i] = Quantity(parameters[i], dimensionless_unscaled)
+
         with_bbox = kwargs.pop('with_bounding_box', False)
         fill_value = kwargs.pop('fill_value', np.nan)
         bbox = None
@@ -1510,7 +1517,7 @@ class Model(metaclass=_ModelMeta):
                         raise UnitsError("Units of input '{0}', (dimensionless), could not be "
                                          "converted to required input units of "
                                          "{1} ({2})".format(self.inputs[i], input_unit,
-                                                            input_unit.physial_type))
+                                                            getattr(input_unit, 'physical_type', dimensionless_unscaled)))
 
                 # Otherwise, if any inputs are quantity, make this input a
                 # dimensionless quantity.

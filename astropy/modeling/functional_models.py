@@ -643,6 +643,7 @@ class Sersic1D(Fittable1DModel):
     def evaluate(cls, r, amplitude, r_eff, n):
         """One dimensional Sersic profile function."""
 
+        n = np.asarray(n)
         if cls._gammaincinv is None:
             try:
                 from scipy.special import gammaincinv
@@ -2411,6 +2412,7 @@ class Sersic2D(Fittable2DModel):
     def evaluate(cls, x, y, amplitude, r_eff, n, x_0, y_0, ellip, theta):
         """Two dimensional Sersic profile function."""
 
+        n = np.asarray(n)
         if cls._gammaincinv is None:
             try:
                 from scipy.special import gammaincinv
