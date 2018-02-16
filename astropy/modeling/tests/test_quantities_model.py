@@ -65,6 +65,21 @@ def test_default_parameters():
     g(10*u.m)
 
 
+class TestModel(Model):
+    inputs = ('x', 'y')
+    outputs = ('x', 'y')
+
+    def evaluate(self, x, y):
+        return x, y
+
+
+def test_input_dimensionless():
+    m = TestModel()
+    x, y = m(10*u.deg, 10)
+    assert isinstance(x, u.Quantity)
+    assert isinstance(y, u.Quantity)
+
+
 def _allmodels():
     allmodels = []
     for name in dir(models):
