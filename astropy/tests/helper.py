@@ -3,14 +3,13 @@
 This module provides the tools used to internally run the astropy test suite
 from the installed astropy.  It makes use of the `pytest` testing framework.
 """
-
+from ..utils.decorators import deprecated
 import os
 import sys
 import types
 import pickle
 import warnings
 import functools
-
 import pytest
 
 try:
@@ -465,7 +464,7 @@ def assert_quantity_allclose(actual, desired, rtol=1.e-7, atol=None,
                                                                rtol, atol),
                                **kwargs)
 
-
+@deprecated("3.1.dev21533")
 def quantity_allclose(a, b, rtol=1.e-5, atol=None, **kwargs):
     """
     Returns True if two arrays are element-wise equal within a tolerance.

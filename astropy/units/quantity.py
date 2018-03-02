@@ -8,6 +8,7 @@ but will deal with unit conversions internally.
 
 
 # Standard library
+
 import re
 import numbers
 from fractions import Fraction
@@ -39,6 +40,15 @@ __doctest_skip__ = ['Quantity.*']
 _UNIT_NOT_INITIALISED = "(Unit not initialised)"
 _UFUNCS_FILTER_WARNINGS = {np.arcsin, np.arccos, np.arccosh, np.arctanh}
 
+def quantity_allclose(a, b, rtol=1.e-5, atol=None, **kwargs):
+    """
+    Returns True if two arrays are element-wise equal within a tolerance.
+
+    This is a :class:`~astropy.units.Quantity`-aware version of
+    :func:`numpy.allclose`.
+    """
+    return np.allclose(*_unquantify_allclose_arguments(a, b, rtol, atol),
+                       **kwargs)
 
 class Conf(_config.ConfigNamespace):
     """
@@ -106,7 +116,6 @@ class QuantityIterator:
         return self._quantity._new_view(out)
 
     next = __next__
-
 
 class QuantityInfoBase(ParentDtypeInfo):
     # This is on a base class rather than QuantityInfo directly, so that
@@ -686,6 +695,7 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):
         # through check_output.
         out._set_unit(unit)
         return out
+
 
     def __quantity_subclass__(self, unit):
         """
