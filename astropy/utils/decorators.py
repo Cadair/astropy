@@ -115,7 +115,7 @@ def deprecated(since, message='', name='', alternative='', pending=False,
                 category = AstropyDeprecationWarning
 
             warnings.warn(message, category, stacklevel=2)
-            
+
             return func(*args, **kwargs)
 
         # If this is an extension function, we can't call

@@ -66,6 +66,7 @@ astropy.table
 
 astropy.tests
 ^^^^^^^^^^^^^
+-Deprecated function ``quantity``allclose to helper
 
 astropy.time
 ^^^^^^^^^^^^
@@ -76,7 +77,7 @@ astropy.time
 
 astropy.units
 ^^^^^^^^^^^^^
-
+-Added function ``quantity``allclose to quantity
 astropy.utils
 ^^^^^^^^^^^^^
 

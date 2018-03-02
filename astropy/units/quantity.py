@@ -8,7 +8,6 @@ but will deal with unit conversions internally.
 
 
 # Standard library
-
 import re
 import numbers
 from fractions import Fraction
@@ -116,6 +115,7 @@ class QuantityIterator:
         return self._quantity._new_view(out)
 
     next = __next__
+
 
 class QuantityInfoBase(ParentDtypeInfo):
     # This is on a base class rather than QuantityInfo directly, so that
@@ -695,7 +695,6 @@ class Quantity(np.ndarray, metaclass=InheritDocstrings):
         # through check_output.
         out._set_unit(unit)
         return out
-
 
     def __quantity_subclass__(self, unit):
         """
