@@ -464,7 +464,7 @@ def assert_quantity_allclose(actual, desired, rtol=1.e-7, atol=None,
                                                                rtol, atol),
                                **kwargs)
 
-@deprecated("3.1","moved function to astropy.units.quantity")
+@deprecated("3.1",alternative='astropy.units.allclose')
 def quantity_allclose(a, b, rtol=1.e-5, atol=None, **kwargs):
     """
     Returns True if two arrays are element-wise equal within a tolerance.
@@ -472,39 +472,10 @@ def quantity_allclose(a, b, rtol=1.e-5, atol=None, **kwargs):
     This is a :class:`~astropy.units.Quantity`-aware version of
     :func:`numpy.allclose`.
     """
-    from ..units.quantity import quantity_allclose as quantity_allclose_units
+    from ..units.quantity import allclose as quantity_allclose_units
     quantity_allclose_units(a, b, rtol=1.e-5, atol=None, **kwargs)
 
-
+@deprecated("3.1",alternative='astropy.units._unquantify_allclose_arguments')
 def _unquantify_allclose_arguments(actual, desired, rtol, atol):
-    from .. import units as u
-
-    actual = u.Quantity(actual, subok=True, copy=False)
-
-    desired = u.Quantity(desired, subok=True, copy=False)
-    try:
-        desired = desired.to(actual.unit)
-    except u.UnitsError:
-        raise u.UnitsError("Units for 'desired' ({0}) and 'actual' ({1}) "
-                           "are not convertible"
-                           .format(desired.unit, actual.unit))
-
-    if atol is None:
-        # by default, we assume an absolute tolerance of 0
-        atol = u.Quantity(0)
-    else:
-        atol = u.Quantity(atol, subok=True, copy=False)
-        try:
-            atol = atol.to(actual.unit)
-        except u.UnitsError:
-            raise u.UnitsError("Units for 'atol' ({0}) and 'actual' ({1}) "
-                               "are not convertible"
-                               .format(atol.unit, actual.unit))
-
-    rtol = u.Quantity(rtol, subok=True, copy=False)
-    try:
-        rtol = rtol.to(u.dimensionless_unscaled)
-    except Exception:
-        raise u.UnitsError("`rtol` should be dimensionless")
-
-    return actual.value, desired.value, rtol.value, atol.value
+    from ..units.quantity import _unquantify_allclose_arguments as _unquantify_allclose
+    _unquantify_allclose(actual, desired, rtol, atol)
