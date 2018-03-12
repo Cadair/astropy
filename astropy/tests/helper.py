@@ -460,11 +460,13 @@ def assert_quantity_allclose(actual, desired, rtol=1.e-7, atol=None,
     :func:`numpy.testing.assert_allclose`.
     """
     import numpy as np
+    from ..units.quantity import _unquantify_allclose_arguments
     np.testing.assert_allclose(*_unquantify_allclose_arguments(actual, desired,
                                                                rtol, atol),
                                **kwargs)
 
-@deprecated("3.1",alternative='astropy.units.allclose')
+
+@deprecated("3.1", alternative='astropy.units.allclose')
 def quantity_allclose(a, b, rtol=1.e-5, atol=None, **kwargs):
     """
     Returns True if two arrays are element-wise equal within a tolerance.
@@ -475,7 +477,7 @@ def quantity_allclose(a, b, rtol=1.e-5, atol=None, **kwargs):
     from ..units.quantity import allclose as quantity_allclose_units
     quantity_allclose_units(a, b, rtol=1.e-5, atol=None, **kwargs)
 
-@deprecated("3.1",alternative='astropy.units._unquantify_allclose_arguments')
+
 def _unquantify_allclose_arguments(actual, desired, rtol, atol):
     from ..units.quantity import _unquantify_allclose_arguments as _unquantify_allclose
     _unquantify_allclose(actual, desired, rtol, atol)
