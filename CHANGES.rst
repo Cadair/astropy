@@ -66,6 +66,7 @@ astropy.table
 
 astropy.tests
 ^^^^^^^^^^^^^
+
 - The function ``quantity_allclose`` was moved to the ``units`` package with the new,
   shorter name ``allclose``. It is deprecated in ``tests``. [#7252]
 
@@ -80,6 +81,7 @@ astropy.time
 
 astropy.units
 ^^^^^^^^^^^^^
+
 -  Added a units-aware ``allclose`` function (this was previously available in the
   ``tests`` module as ``quantity_allclose``) [#7252]
 
