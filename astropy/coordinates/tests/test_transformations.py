@@ -13,7 +13,7 @@ from ..baseframe import frame_transform_graph
 from ...tests.helper import (assert_quantity_allclose as assert_allclose,
                               catch_warnings)
 from ...time import Time
-from ...units.quantity import allclose as quantity_allclose
+from ...units import allclose as quantity_allclose
 
 
 # Coordinates just for these tests.

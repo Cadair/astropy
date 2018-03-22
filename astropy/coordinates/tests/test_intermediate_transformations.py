@@ -20,7 +20,7 @@ from ..._erfa import epv00
 from .utils import randomly_sample_sphere
 from ..builtin_frames.utils import get_jd12
 from .. import solar_system_ephemeris
-from ...units.quantity import allclose
+from ...units import allclose
 
 try:
     import jplephem  # pylint: disable=W0611

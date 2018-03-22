@@ -26,7 +26,7 @@ from ...time import Time
 from ...utils import minversion, isiterable
 from ...utils.compat import NUMPY_LT_1_14
 from ...utils.exceptions import AstropyDeprecationWarning
-from ...units.quantity import allclose as quantity_allclose
+from ...units import allclose as quantity_allclose
 
 RA = 1.0 * u.deg
 DEC = 2.0 * u.deg

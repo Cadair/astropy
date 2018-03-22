@@ -12,7 +12,7 @@ from .. import SkyCoord
 from ...tests.helper import (assert_quantity_allclose as assert_allclose)
 from .. import EarthLocation, CartesianRepresentation
 from ...time import Time
-from ...units.quantity import allclose
+from ...units import allclose
 
 # used below in the next parametrized test
 m31_sys = [ICRS, FK5, FK4, Galactic]

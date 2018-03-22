@@ -21,7 +21,7 @@ from ...tests.helper import (raises, assert_quantity_allclose as assert_allclose
 from ... import units as u
 from ... import time
 from ... import coordinates as coords
-from ...units.quantity import allclose
+from ...units import allclose
 
 try:
     import scipy  # pylint: disable=W0611
