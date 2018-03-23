@@ -82,11 +82,10 @@ astropy.time
 astropy.units
 ^^^^^^^^^^^^^
 
--  Added a units-aware ``allclose`` function (this was previously available in the
-  ``tests`` module as ``quantity_allclose``) [#7252]
+-  Added a units-aware ``allclose`` function (this was previously available in the ``tests`` module as ``quantity_allclose``) [#7252]
 
--  Added a units-aware ``_unquantify_allclose_arguments`` function (this was previously available in the
-  ``tests`` module as ``_unquantify_allclose_arguments``) [#7252]
+-  Added a units-aware ``_unquantify_allclose_arguments`` function (this was previously available in the ``tests`` module as
+	``_unquantify_allclose_arguments``) [#7252]
 
 astropy.utils
 ^^^^^^^^^^^^^
