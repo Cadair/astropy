@@ -552,7 +552,7 @@ def get_config(packageormod=None, reload=False, rootname=None):
                 if _override_config_file is not None:
                     cfgfn = _override_config_file
                 else:
-                    cfgfn = path.join(get_config_dir(rootname), pkgname + '.cfg')
+                    cfgfn = path.join(get_config_dir(rootname=rootname), pkgname + '.cfg')
                 cobj = configobj.ConfigObj(cfgfn, interpolation=False)
             except OSError as e:
                 msg = ('Configuration defaults will be used due to ')
@@ -721,7 +721,7 @@ def update_default_config(pkg, default_cfg_dir_or_fn, version=None, rootname='as
     # spamming `~/.astropy/config`.
     if 'dev' not in version and cfgfn is not None:
         template_path = path.join(
-            get_config_dir(rootname), '{0}.{1}.cfg'.format(pkg, version))
+            get_config_dir(rootname=rootname), '{0}.{1}.cfg'.format(pkg, version))
         needs_template = not path.exists(template_path)
     else:
         needs_template = False
