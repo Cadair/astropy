@@ -225,7 +225,6 @@ def test_config_noastropy_fallback(monkeypatch):
     # astropy dir could not be accessed
     def osraiser(dirnm, linkto, pkgname=None):
         raise OSError
-    monkeypatch.setattr(paths, '_find_or_create_root_dir', osraiser)
 
     # also have to make sure the stored configuration objects are cleared
     monkeypatch.setattr(configuration, '_cfgobjs', {})
