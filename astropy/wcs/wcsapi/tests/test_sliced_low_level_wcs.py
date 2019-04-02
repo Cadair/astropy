@@ -267,3 +267,34 @@ def test_celestial_range_rot():
     assert_equal(wcs.world_to_array_index_values(1, 15, 24), (34, 29, 14))
 
     assert_equal(wcs.pixel_bounds, [(-6, 6), (-2, 18), (5, 15)])
+
+
+import gwcs
+import gwcs.coordinate_frames as cf
+from astropy.coordinates import ICRS
+from astropy.modeling.models import Identity
+
+@pytest.fixture
+def gwcs_3d():
+    detector_frame = cf.CoordinateFrame(
+        name="detector",
+        naxes=3,
+        axes_order=(0, 1, 2),
+        axes_type=("pixel", "pixel", "pixel"),
+        axes_names=("x", "y", "z"),
+        unit=(u.pix, u.pix, u.pix))
+
+    sky_frame = cf.CelestialFrame(reference_frame=ICRS(), name='icrs')
+    spec_frame = cf.SpectralFrame(name="spectral", axes_order=(2, ), unit=u.nm)
+    out_frame = cf.CompositeFrame(frames=(sky_frame, spec_frame))
+
+    return gwcs.WCS(forward_transform=Identity(1) & Identity(1) & Identity(1),
+                    input_frame=detector_frame, output_frame=out_frame)
+
+def test_slicer_gwcs(gwcs_3d):
+
+    wcs = SlicedLowLevelWCS(gwcs_3d, [Ellipsis, 5])
+    wcs.pixel_n_dim == 2
+    wcs.world_n_dim == 2
+
+
