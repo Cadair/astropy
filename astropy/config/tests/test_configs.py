@@ -96,6 +96,7 @@ def test_config_file():
     #   default to astropy):
     testcfg = get_config('testpkg')
     parts = os.path.normpath(testcfg.filename).split(os.sep)
+    print(parts)
     assert 'astropy' in parts[-3]
     assert parts[-1] == 'testpkg.cfg'
     configuration._cfgobjs['testpkg'] = None  # HACK
@@ -103,6 +104,7 @@ def test_config_file():
     # try with a different package name, specified root name:
     testcfg = get_config('testpkg', rootname='testpkg')
     parts = os.path.normpath(testcfg.filename).split(os.sep)
+    print(parts)
     assert 'testpkg' in parts[-3]
     assert parts[-1] == 'testpkg.cfg'
     configuration._cfgobjs['testpkg'] = None  # HACK
@@ -110,6 +112,7 @@ def test_config_file():
     # try with a subpackage with specified root name:
     testcfg_sec = get_config('testpkg.somemodule', rootname='testpkg')
     parts = os.path.normpath(testcfg_sec.parent.filename).split(os.sep)
+    print(parts)
     assert 'testpkg' in parts[-3]
     assert parts[-1] == 'testpkg.cfg'
     configuration._cfgobjs['testpkg'] = None  # HACK
@@ -224,7 +227,7 @@ def test_config_noastropy_fallback(monkeypatch):
 
     # make sure the _find_or_create_root_dir function fails as though the
     # astropy dir could not be accessed
-    def osraiser(dirnm, linkto, pkgname=None):
+    def osraiser(dirnm, linkto, pkgname=None, create=False):
         raise OSError
     monkeypatch.setattr(paths, '_find_or_create_root_dir', osraiser)
 

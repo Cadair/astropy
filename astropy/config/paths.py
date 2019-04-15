@@ -76,7 +76,7 @@ def _find_home():
     return homedir
 
 
-def get_config_dir(rootname, create=True):
+def get_config_dir(rootname, create=False):
     """
     Determines the package configuration directory name and creates the
     directory if it doesn't exist.
@@ -110,7 +110,7 @@ def get_config_dir(rootname, create=True):
     if set_temp_config._temp_path is not None:
         xch = set_temp_config._temp_path
         config_path = os.path.join(xch, rootname)
-        if not os.path.exists(config_path):
+        if create and not os.path.exists(config_path):
             os.mkdir(config_path)
         return os.path.abspath(config_path)
 
@@ -124,7 +124,7 @@ def get_config_dir(rootname, create=True):
                 return os.path.abspath(xchpth)
             else:
                 linkto = xchpth
-    return os.path.abspath(_find_or_create_root_dir('config', linkto, rootname))
+    return os.path.abspath(_find_or_create_root_dir('config', linkto, rootname, create))
 
 
 def get_cache_dir(rootname):
@@ -286,27 +286,30 @@ class set_temp_cache(_SetTempPath):
     _default_path_getter = staticmethod(get_cache_dir)
 
 
-def _find_or_create_root_dir(dirnm, linkto, pkgname='astropy'):
+def _find_or_create_root_dir(dirnm, linkto, pkgname='astropy', create=True):
     innerdir = os.path.join(_find_home(), '.{}'.format(pkgname))
     maindir = os.path.join(_find_home(), '.{}'.format(pkgname), dirnm)
+    print(innerdir, maindir)
 
     if not os.path.exists(maindir):
         # first create .astropy dir if needed
-        if not os.path.exists(innerdir):
-            try:
-                os.mkdir(innerdir)
-            except OSError:
-                if not os.path.isdir(innerdir):
-                    raise
-        elif not os.path.isdir(innerdir):
-            msg = 'Intended {0} {1} directory {1} is actually a file.'
-            raise OSError(msg.format(pkgname, dirnm, maindir))
+        if create:
+            if not os.path.exists(innerdir):
+                try:
+                    os.mkdir(innerdir)
+                except OSError:
+                    if not os.path.isdir(innerdir):
+                        raise
+            elif not os.path.isdir(innerdir):
+                msg = 'Intended {0} {1} directory {1} is actually a file.'
+                raise OSError(msg.format(pkgname, dirnm, maindir))
 
-        try:
-            os.mkdir(maindir)
-        except OSError:
-            if not os.path.isdir(maindir):
-                raise
+        if create:
+            try:
+                os.mkdir(maindir)
+            except OSError:
+                if not os.path.isdir(maindir):
+                    raise
 
         if (not sys.platform.startswith('win') and
             linkto is not None and
