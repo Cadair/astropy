@@ -88,33 +88,34 @@ def test_config_file():
     # try with a different package name, still inside astropy config dir:
     testcfg = get_config('testpkg', rootname='astropy')
     parts = os.path.normpath(testcfg.filename).split(os.sep)
-    assert 'astropy' in parts[-2]
+    assert 'astropy' in parts[-3]
     assert parts[-1] == 'testpkg.cfg'
-    configuration._cfgobjs['testpkg'] = None # HACK
+    configuration._cfgobjs['testpkg'] = None  # HACK
 
     # try with a different package name, no specified root name (should
     #   default to astropy):
     testcfg = get_config('testpkg')
     parts = os.path.normpath(testcfg.filename).split(os.sep)
-    assert 'astropy' in parts[-2]
+    assert 'astropy' in parts[-3]
     assert parts[-1] == 'testpkg.cfg'
-    configuration._cfgobjs['testpkg'] = None # HACK
+    configuration._cfgobjs['testpkg'] = None  # HACK
 
     # try with a different package name, specified root name:
     testcfg = get_config('testpkg', rootname='testpkg')
     parts = os.path.normpath(testcfg.filename).split(os.sep)
-    assert 'testpkg' in parts[-2]
+    assert 'testpkg' in parts[-3]
     assert parts[-1] == 'testpkg.cfg'
-    configuration._cfgobjs['testpkg'] = None # HACK
+    configuration._cfgobjs['testpkg'] = None  # HACK
 
     # try with a subpackage with specified root name:
     testcfg_sec = get_config('testpkg.somemodule', rootname='testpkg')
     parts = os.path.normpath(testcfg_sec.parent.filename).split(os.sep)
-    assert 'testpkg' in parts[-2]
+    assert 'testpkg' in parts[-3]
     assert parts[-1] == 'testpkg.cfg'
-    configuration._cfgobjs['testpkg'] = None # HACK
+    configuration._cfgobjs['testpkg'] = None  # HACK
 
     reload_config('astropy')
+
 
 def test_configitem():
 
