@@ -524,20 +524,12 @@ def get_config(packageormod=None, reload=False, rootname=None):
         else:
             packageormod = packageormod.__name__
 
-        _autopkg = True
-
-    else:
-        _autopkg = False
-
     packageormodspl = packageormod.split('.')
     pkgname = packageormodspl[0]
     secname = '.'.join(packageormodspl[1:])
 
     if rootname is None:
-        if _autopkg:
-            rootname = pkgname
-        else:
-            rootname = 'astropy'  # so we don't break affiliated packages
+        rootname = 'astropy'
 
     cobj = _cfgobjs.get(pkgname, None)
 
@@ -548,7 +540,7 @@ def get_config(packageormod=None, reload=False, rootname=None):
             if _override_config_file is not None:
                 cfgfn = _override_config_file
             else:
-                cfgfn = path.join(get_config_dir(rootname), rootname + '.cfg')
+                cfgfn = path.join(get_config_dir(rootname), pkgname + '.cfg')
             cobj = configobj.ConfigObj(cfgfn, interpolation=False)
         except OSError as e:
             msg = ('Configuration defaults will be used due to ')
