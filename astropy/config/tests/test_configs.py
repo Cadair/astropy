@@ -85,7 +85,7 @@ def test_config_file():
     # try with a different package name, still inside astropy config dir:
     testcfg = get_config('testpkg')  # rootname=astropy
     parts = os.path.normpath(testcfg.filename).split(os.sep)
-    assert 'astropy' in parts[-3]
+    assert parts[-3].endswith("astropy")
     assert parts[-1] == 'testpkg.cfg'
     configuration._cfgobjs['testpkg'] = None  # HACK
 
@@ -93,7 +93,7 @@ def test_config_file():
     #   default to astropy):
     testcfg = get_config('testpkg')
     parts = os.path.normpath(testcfg.filename).split(os.sep)
-    assert 'astropy' in parts[-3]
+    assert parts[-3].endswith("astropy")
     assert parts[-1] == 'testpkg.cfg'
     configuration._cfgobjs['testpkg'] = None  # HACK
 
