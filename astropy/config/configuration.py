@@ -657,8 +657,8 @@ def write_default_config(pkg, rootname=None):
 
     Returns
     -------
-    filepath : `str`
-        The full path of the file written.
+    filepath : `pathlib.Path` or `None`
+        The full path of the file written or `None` if no file was written.
     """
     rootname = rootname or 'astropy'
 
@@ -667,9 +667,13 @@ def write_default_config(pkg, rootname=None):
     pkgpath = pathlib.Path(package.__file__)
 
     # Ensure the config directory exists
-    get_config_dir(rootname, create=True)
+    cfgdir = get_config_dir(rootname, create=True)
 
-    return update_default_config(pkg, str(pkgpath.parent), rootname=rootname)
+    written = update_default_config(pkg, str(pkgpath.parent),
+                                    rootname=rootname)
+
+    if written:
+        return pathlib.Path(cfgdir) / (pkg + '.cfg')
 
 
 # this is not in __all__ because it's not intended that a user uses it
@@ -705,7 +709,6 @@ def update_default_config(pkg, default_cfg_dir_or_fn, version=None, rootname='as
         If the version number of the package could not determined.
 
     """
-    breakpoint()
     if path.isdir(default_cfg_dir_or_fn):
         default_cfgfn = path.join(default_cfg_dir_or_fn, pkg + '.cfg')
     else:
