@@ -15,6 +15,8 @@ import io
 from os import path
 import re
 from warnings import warn
+import pathlib
+import importlib
 
 from astropy.extern.configobj import configobj, validate
 from astropy.utils.exceptions import AstropyWarning, AstropyDeprecationWarning
@@ -24,7 +26,7 @@ from astropy.utils.misc import InheritDocstrings
 from .paths import get_config_dir
 
 
-__all__ = ['InvalidConfigurationItemWarning',
+__all__ = ['write_default_config', 'InvalidConfigurationItemWarning',
            'ConfigurationMissingWarning', 'get_config',
            'reload_config', 'ConfigNamespace', 'ConfigItem']
 
@@ -637,6 +639,39 @@ def is_unedited_config_file(content, template_content=None):
     return digest in known_configs
 
 
+def write_default_config(pkg, rootname=None):
+    """
+    Writes out the template configuration file for the package.
+
+    This function should be used to save a template config file for manual
+    editing, if a config file already exits this will write a config file
+    appended with the version number, to facilitate comparison of changes.
+
+    Parameters
+    ----------
+    pkg : `str`
+        The name of the Python module to write the default config for.
+
+    rootname : `str`, optional
+        The name of the directory to save the configuration in.
+
+    Returns
+    -------
+    filepath : `str`
+        The full path of the file written.
+    """
+    rootname = rootname or 'astropy'
+
+    # Import the package to get the template path.
+    package = importlib.import_module(pkg)
+    pkgpath = pathlib.Path(package.__file__)
+
+    # Ensure the config directory exists
+    get_config_dir(rootname, create=True)
+
+    return update_default_config(pkg, str(pkgpath.parent), rootname=rootname)
+
+
 # this is not in __all__ because it's not intended that a user uses it
 def update_default_config(pkg, default_cfg_dir_or_fn, version=None, rootname='astropy'):
     """
@@ -670,7 +705,7 @@ def update_default_config(pkg, default_cfg_dir_or_fn, version=None, rootname='as
         If the version number of the package could not determined.
 
     """
-
+    breakpoint()
     if path.isdir(default_cfg_dir_or_fn):
         default_cfgfn = path.join(default_cfg_dir_or_fn, pkg + '.cfg')
     else:
