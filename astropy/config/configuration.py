@@ -541,7 +541,6 @@ def get_config(packageormod=None, reload=False, rootname=None):
                 cfgfn = _override_config_file
             else:
                 cfgfn = path.join(get_config_dir(rootname), pkgname + '.cfg')
-                print(cfgfn)
             cobj = configobj.ConfigObj(cfgfn, interpolation=False)
         except OSError as e:
             msg = ('Configuration defaults will be used due to ')
