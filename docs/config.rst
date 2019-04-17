@@ -13,24 +13,19 @@ The Astropy configuration system is designed to give users control of various
 parameters used in Astropy or affiliated packages without delving into the
 source code to make those changes.
 
-.. note::
-    The configuration system got a major overhaul in ``astropy`` 0.4 as
-    part of APE3. See :ref:`config-0-4-transition` for information
-    about updating code to use the new API.
-
 
 Getting Started
 ===============
 
-The Astropy configuration options are most conveniently set by modifying the
-configuration file. It will be automatically generated with all of the
-default values commented out the first time you import Astropy. You
-can find the exact location by doing::
+The Astropy configuration options are most easily set by modifying the
+configuration file. If you want to modify the configuration file from the
+default you can save the default config to a file::
 
-    >>> from astropy.config import get_config_dir
-    >>> get_config_dir()
+    >>> import astropy
+    >>> astropy.write_default_config()
+    PosixPath('~/.astropy/config/astropy.cfg')
 
-And you should see the location of your configuration directory. The standard
+It should return the location of your configuration directory. The standard
 scheme generally puts your configuration directory in
 ``$HOME/.astropy/config``. It can be customized with the environment variable
 ``XDG_CONFIG_HOME`` and the ``$XDG_CONFIG_HOME/astropy`` directory must exist.
@@ -163,9 +158,9 @@ Upgrading ``astropy``
 Each time you upgrade to a new major version of ``astropy``, the
 configuration parameters may have changed.
 
-If you never edited your configuration file, there is nothing for you
-to do. It will automatically be replaced with a configuration file
-template for the newly installed version of ``astropy``.
+If you never edited your configuration file, there is nothing for you to do. It
+will automatically be replaced with a configuration file template for the newly
+installed version of astropy when running ``astropy.write_default_config``
 
 If you did customize your configuration file, it will not be touched.
 Instead, a new configuration file template will be installed alongside
@@ -355,11 +350,6 @@ Or, if the option needs to be available as a function parameter::
 
 See Also
 ========
-
-.. toctree::
-   :maxdepth: 2
-
-   config_0_4_transition
 
 :doc:`/logging` (overview of `astropy.logger`)
 

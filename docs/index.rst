@@ -112,7 +112,7 @@ Nuts and bolts
 .. toctree::
    :maxdepth: 1
 
-   config/index
+   config
    io/registry
    logging
    warnings
