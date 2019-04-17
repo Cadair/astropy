@@ -91,7 +91,7 @@ def get_config_dir(create=False, rootname='astropy'):
     rootname : str
         Name of the root configuration directory. For example, if
         ``rootname = 'pkgname'``, the configuration directory will be
-        ``<home>/.pkgname/``.
+        ``<config_dir>/.pkgname/``.
 
     create : bool, optional
         Create the path if it doesn't exist.
@@ -142,7 +142,7 @@ def get_cache_dir(rootname='astropy'):
     rootname : str
         Name of the root cache directory. For example, if
         ``rootname = 'pkgname'``, the cache directory will be
-        ``<cache>/.pkgname/``.
+        ``<cache_dir>/pkgname/``.
 
     Returns
     -------
