@@ -5,6 +5,7 @@
 import os
 import sys
 import subprocess
+from pathlib import Path
 
 import pytest
 
@@ -14,6 +15,7 @@ from astropy.utils.data import get_pkg_data_filename
 from astropy.config import configuration
 from astropy.config import paths
 from astropy.utils.exceptions import AstropyDeprecationWarning
+from astropy.config.configuration import get_config, reload_config
 
 
 def test_paths():
@@ -29,7 +31,7 @@ def test_set_temp_config(tmpdir, monkeypatch):
 
     orig_config_dir = paths.get_config_dir(rootname='astropy')
     temp_config_dir = str(tmpdir.mkdir('config'))
-    temp_astropy_config = os.path.join(temp_config_dir, 'astropy')
+    temp_astropy_config = os.path.join(temp_config_dir, '.astropy')
 
     # Test decorator mode
     @paths.set_temp_config(temp_config_dir)
@@ -74,45 +76,46 @@ def test_set_temp_cache(tmpdir, monkeypatch):
     assert not os.path.exists(temp_cache_dir)
 
 
-def test_config_file():
-    from astropy.config.configuration import get_config, reload_config
+def get_config_path(*args, **kwargs):
+    """A simple test helper."""
+    return Path(get_config(*args, **kwargs).filename)
 
-    apycfg = get_config('astropy')
-    assert apycfg.filename.endswith('astropy.cfg')
+
+def test_config_file():
+    cfg = get_config_path('astropy')
+    assert cfg.name == 'astropy.cfg'
 
     cfgsec = get_config('astropy.config')
     assert cfgsec.depth == 1
     assert cfgsec.name == 'config'
     assert cfgsec.parent.filename.endswith('astropy.cfg')
 
+
+def test_rootname():
     # try with a different package name, still inside astropy config dir:
-    testcfg = get_config('testpkg', rootname='astropy')
-    parts = os.path.normpath(testcfg.filename).split(os.sep)
-    assert 'astropy' in parts[-2]
-    assert parts[-1] == 'testpkg.cfg'
-    configuration._cfgobjs['testpkg'] = None  # HACK
+    cfg = get_config_path('testpkg', rootname='astropy')
+    assert '.astropy' in cfg.parts
+    assert cfg.name == 'testpkg.cfg'
+    configuration._cfgobjs['testpkg'] = None  # Clear cache
 
     # try with a different package name, no specified root name (should
     #   default to astropy):
-    testcfg = get_config('testpkg')
-    parts = os.path.normpath(testcfg.filename).split(os.sep)
-    assert 'astropy' in parts[-2]
-    assert parts[-1] == 'testpkg.cfg'
-    configuration._cfgobjs['testpkg'] = None  # HACK
+    cfg = get_config_path('testpkg')
+    assert '.astropy' in cfg.parts
+    assert cfg.name == 'testpkg.cfg'
+    configuration._cfgobjs['testpkg'] = None  # Clear cache
 
     # try with a different package name, specified root name:
-    testcfg = get_config('testpkg', rootname='testpkg')
-    parts = os.path.normpath(testcfg.filename).split(os.sep)
-    assert 'testpkg' in parts[-2]
-    assert parts[-1] == 'testpkg.cfg'
-    configuration._cfgobjs['testpkg'] = None  # HACK
+    cfg = get_config_path('testpkg', rootname='testpkg')
+    assert '.testpkg' in cfg.parts
+    assert cfg.name == 'testpkg.cfg'
+    configuration._cfgobjs['testpkg'] = None  # Clear cache
 
     # try with a subpackage with specified root name:
-    testcfg_sec = get_config('testpkg.somemodule', rootname='testpkg')
-    parts = os.path.normpath(testcfg_sec.parent.filename).split(os.sep)
-    assert 'testpkg' in parts[-2]
-    assert parts[-1] == 'testpkg.cfg'
-    configuration._cfgobjs['testpkg'] = None  # HACK
+    cfg = Path(get_config('testpkg.somemodule', rootname='testpkg').parent.filename)
+    assert '.testpkg' in cfg.parts
+    assert cfg.name == 'testpkg.cfg'
+    configuration._cfgobjs['testpkg'] = None  # Clear cache
 
     reload_config('astropy')
 

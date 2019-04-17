@@ -109,7 +109,7 @@ def get_config_dir(create=False, rootname='astropy'):
     # If using set_temp_config, that overrides all
     if set_temp_config._temp_path is not None:
         xch = set_temp_config._temp_path
-        config_path = os.path.join(xch, rootname)
+        config_path = os.path.join(xch, "." + rootname)
         if create and not os.path.exists(config_path):
             os.mkdir(config_path)
         return os.path.abspath(config_path)
