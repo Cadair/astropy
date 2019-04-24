@@ -633,7 +633,7 @@ def is_unedited_config_file(content, template_content=None):
     return digest in known_configs
 
 
-def write_default_config(pkg, rootname=None):
+def write_default_config(pkg, rootname='astropy'):
     """
     Writes out the template configuration file for the package.
 
