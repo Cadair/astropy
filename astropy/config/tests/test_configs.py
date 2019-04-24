@@ -16,6 +16,7 @@ from astropy.config import configuration
 from astropy.config import paths
 from astropy.utils.exceptions import AstropyDeprecationWarning
 from astropy.config.configuration import get_config, reload_config
+from astropy.extern.configobj import configobj
 
 
 def test_paths():
@@ -29,14 +30,14 @@ def test_paths():
 def test_set_temp_config(tmpdir, monkeypatch):
     monkeypatch.setattr(paths.set_temp_config, '_temp_path', None)
 
-    orig_config_dir = paths.get_config_dir(rootname='astropy')
+    orig_config_dir = paths.get_config_dir()
     temp_config_dir = str(tmpdir.mkdir('config'))
     temp_astropy_config = os.path.join(temp_config_dir, '.astropy')
 
     # Test decorator mode
     @paths.set_temp_config(temp_config_dir)
     def test_func():
-        assert paths.get_config_dir(rootname='astropy') == temp_astropy_config
+        assert paths.get_config_dir() == temp_astropy_config
 
         # Test temporary restoration of original default
         with paths.set_temp_config() as d:
@@ -46,7 +47,7 @@ def test_set_temp_config(tmpdir, monkeypatch):
 
     # Test context manager mode (with cleanup)
     with paths.set_temp_config(temp_config_dir, delete=True):
-        assert paths.get_config_dir(rootname='astropy') == temp_astropy_config
+        assert paths.get_config_dir() == temp_astropy_config
 
     assert not os.path.exists(temp_config_dir)
 
@@ -78,7 +79,10 @@ def test_set_temp_cache(tmpdir, monkeypatch):
 
 def get_config_path(*args, **kwargs):
     """A simple test helper."""
-    return Path(get_config(*args, **kwargs).filename)
+    cfg = get_config(*args, **kwargs)
+    if isinstance(cfg, configobj.Section):
+        cfg = cfg.parent
+    return Path(cfg.filename)
 
 
 def test_config_file():
@@ -91,30 +95,25 @@ def test_config_file():
     assert cfgsec.parent.filename.endswith('astropy.cfg')
 
 
-def test_rootname():
+@pytest.mark.parametrize("kwargs, dirname, filename", [
+    ({'packageormod': 'testpkg', 'rootname': 'astropy'},
+     '.astropy',
+     'testpkg.cfg'),
+    ({'packageormod': 'testpkg'},
+     '.astropy',
+     'testpkg.cfg'),
+    ({'packageormod': 'testpkg', 'rootname': 'testpkg'},
+     '.testpkg',
+     'testpkg.cfg'),
+    ({'packageormod': 'testpkg.somemodule', 'rootname': 'testpkg'},
+     '.testpkg',
+     'testpkg.cfg'),
+])
+def test_rootname(kwargs, dirname, filename):
     # try with a different package name, still inside astropy config dir:
-    cfg = get_config_path('testpkg', rootname='astropy')
-    assert '.astropy' in cfg.parts
-    assert cfg.name == 'testpkg.cfg'
-    configuration._cfgobjs['testpkg'] = None  # Clear cache
-
-    # try with a different package name, no specified root name (should
-    #   default to astropy):
-    cfg = get_config_path('testpkg')
-    assert '.astropy' in cfg.parts
-    assert cfg.name == 'testpkg.cfg'
-    configuration._cfgobjs['testpkg'] = None  # Clear cache
-
-    # try with a different package name, specified root name:
-    cfg = get_config_path('testpkg', rootname='testpkg')
-    assert '.testpkg' in cfg.parts
-    assert cfg.name == 'testpkg.cfg'
-    configuration._cfgobjs['testpkg'] = None  # Clear cache
-
-    # try with a subpackage with specified root name:
-    cfg = Path(get_config('testpkg.somemodule', rootname='testpkg').parent.filename)
-    assert '.testpkg' in cfg.parts
-    assert cfg.name == 'testpkg.cfg'
+    cfg = get_config_path(**kwargs)
+    assert dirname in cfg.parts
+    assert cfg.name == filename
     configuration._cfgobjs['testpkg'] = None  # Clear cache
 
     reload_config('astropy')

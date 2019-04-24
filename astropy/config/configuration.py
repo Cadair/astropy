@@ -483,25 +483,22 @@ def get_config_filename(packageormod=None, rootname=None):
 _override_config_file = None
 
 
-def get_config(packageormod=None, reload=False, rootname=None):
+def get_config(packageormod=None, reload=False, rootname='astropy'):
     """ Gets the configuration object or section associated with a particular
     package or module.
 
     Parameters
     -----------
-    packageormod : str or None
+    packageormod : `str` or `None`
         The package for which to retrieve the configuration object. If a
-        string, it must be a valid package name, or if ``None``, the package from
-        which this function is called will be used.
+        string, it must be a valid package name, or if `None`, the package
+        from which this function is called will be used.
 
-    reload : bool, optional
+    reload : `bool`, optional
         Reload the file, even if we have it cached.
 
-    rootname : str or None
-        Name of the root configuration directory. If ``None`` and
-        ``packageormod`` is ``None``, this defaults to be the name of
-        the package from which this function is called. If ``None`` and
-        ``packageormod`` is not ``None``, this defaults to ``astropy``.
+    rootname : `str`, optional
+        Name of the root configuration directory. Defaults to ``astropy``.
 
     Returns
     -------
@@ -529,9 +526,6 @@ def get_config(packageormod=None, reload=False, rootname=None):
     packageormodspl = packageormod.split('.')
     pkgname = packageormodspl[0]
     secname = '.'.join(packageormodspl[1:])
-
-    if rootname is None:
-        rootname = 'astropy'
 
     cobj = _cfgobjs.get(pkgname, None)
 
