@@ -32,7 +32,7 @@ def test_set_temp_config(tmpdir, monkeypatch):
 
     orig_config_dir = paths.get_config_dir()
     temp_config_dir = str(tmpdir.mkdir('config'))
-    temp_astropy_config = os.path.join(temp_config_dir, '.astropy')
+    temp_astropy_config = os.path.join(temp_config_dir, 'astropy')
 
     # Test decorator mode
     @paths.set_temp_config(temp_config_dir)
@@ -97,16 +97,16 @@ def test_config_file():
 
 @pytest.mark.parametrize("kwargs, dirname, filename", [
     ({'packageormod': 'testpkg', 'rootname': 'astropy'},
-     '.astropy',
+     'astropy',
      'testpkg.cfg'),
     ({'packageormod': 'testpkg'},
-     '.astropy',
+     'astropy',
      'testpkg.cfg'),
     ({'packageormod': 'testpkg', 'rootname': 'testpkg'},
-     '.testpkg',
+     'testpkg',
      'testpkg.cfg'),
     ({'packageormod': 'testpkg.somemodule', 'rootname': 'testpkg'},
-     '.testpkg',
+     'testpkg',
      'testpkg.cfg'),
 ])
 def test_rootname(kwargs, dirname, filename):
@@ -228,7 +228,7 @@ def test_config_noastropy_fallback(monkeypatch):
     # astropy dir could not be accessed
     def osraiser(dirnm, linkto, pkgname=None, create=False):
         raise OSError
-    monkeypatch.setattr(paths, '_find_or_create_root_dir', osraiser)
+    monkeypatch.setattr(paths, '_get_dir', osraiser)
 
     # also have to make sure the stored configuration objects are cleared
     monkeypatch.setattr(configuration, '_cfgobjs', {})
