@@ -160,7 +160,7 @@ configuration parameters may have changed.
 
 If you never edited your configuration file, there is nothing for you to do. It
 will automatically be replaced with a configuration file template for the newly
-installed version of astropy when running ``astropy.write_default_config``
+installed version of astropy when running ``astropy.write_default_config()``.
 
 If you did customize your configuration file, it will not be touched.
 Instead, a new configuration file template will be installed alongside

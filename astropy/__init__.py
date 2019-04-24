@@ -312,7 +312,7 @@ def write_default_config():
     Writes out the template configuration file for this version of astropy.
 
     This function will save a template config file for manual editing, if a
-    config file already exits this will write a config file appended with the
+    config file already exists, this will write a config file appended with the
     version number, to facilitate comparison of changes.
 
     Returns

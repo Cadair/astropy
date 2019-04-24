@@ -644,7 +644,7 @@ def write_default_config(pkg, rootname=None):
     Writes out the template configuration file for the package.
 
     This function should be used to save a template config file for manual
-    editing, if a config file already exits this will write a config file
+    editing, if a config file already exists, this will write a config file
     appended with the version number, to facilitate comparison of changes.
 
     Parameters

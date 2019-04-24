@@ -969,7 +969,7 @@ def download_file(remote_url, cache=False, show_progress=True, timeout=None, pkg
         `astropy.utils.data.Conf.remote_timeout`.
 
     pkgname : `str`, optional
-        The package name to use to locate the download cache. i.e. for
+        The package name to use to locate the download cache; i.e., for
         ``pkgname='astropy'`` the default cache location is
         ``~/.astropy/cache``.
 
