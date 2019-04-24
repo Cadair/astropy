@@ -559,7 +559,7 @@ def get_config(packageormod=None, reload=False, rootname='astropy'):
         return cobj
 
 
-def reload_config(packageormod=None, rootname=None):
+def reload_config(packageormod=None, rootname='astropy'):
     """ Reloads configuration settings from a configuration file for the root
     package of the requested package/module.
 
@@ -633,7 +633,7 @@ def is_unedited_config_file(content, template_content=None):
     return digest in known_configs
 
 
-def write_default_config(pkg, rootname=None):
+def write_default_config(pkg, rootname='astropy'):
     """
     Writes out the template configuration file for the package.
 
