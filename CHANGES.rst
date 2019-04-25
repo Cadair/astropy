@@ -7,6 +7,10 @@ New Features
 astropy.config
 ^^^^^^^^^^^^^^
 
+- The config and cache directories and the name of the config file are now
+  customizable. This allows affiliated packages to put their configuration
+  files in locations other than ``CONFIG_DIR/.astropy/``. [#8237]
+
 astropy.constants
 ^^^^^^^^^^^^^^^^^
 
@@ -321,19 +325,12 @@ Other Changes and Additions
 
 3.2 (unreleased)
 ================
-- The config and cache directories and the name of the config file are now
-  customizable. This allows affiliated packages to put their configuration
-  files in locations other than ``CONFIG_DIR/.astropy/``. [#5828]
 
 New Features
 ------------
 
 astropy.config
 ^^^^^^^^^^^^^^
-- The config and cache directories and the name of the config file are now
-  customizable. This allows affiliated packages to put their configuration
-  files in locations other than ``CONFIG_DIR/.astropy/``. [#5828]
-  files in locations other than ``CONFIG_DIR/.astropy/``. [#6985]
 
 astropy.constants
 ^^^^^^^^^^^^^^^^^
@@ -452,9 +449,6 @@ astropy.table
   index is now handled in the conversion methods. [#8247]
 - Added ``rename_columns`` method to rename multiple columns in one call. [#5159, #8070]
 
-- ``astropy.constants``
-
-- Allow to pass ``htmldict`` option to the jsviewer writer. [#6551]
 
 - Improved Table performance by reducing unnecessary calls to copy and deepcopy,
   especially as related to the table and column ``meta`` attributes.  Changed the
