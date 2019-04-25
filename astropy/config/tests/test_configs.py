@@ -6,6 +6,7 @@ import os
 import sys
 import subprocess
 from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -15,7 +16,7 @@ from astropy.utils.data import get_pkg_data_filename
 from astropy.config import configuration
 from astropy.config import paths
 from astropy.utils.exceptions import AstropyDeprecationWarning
-from astropy.config.configuration import get_config, reload_config
+from astropy.config.configuration import get_config, reload_config, write_default_config
 from astropy.extern.configobj import configobj
 
 
@@ -386,3 +387,19 @@ def test_unedited_template():
     config_dir = os.path.join(os.path.dirname(__file__), '..', '..')
     configuration.update_default_config('astropy', config_dir)
     assert configuration.update_default_config('astropy', config_dir) is False
+
+
+@pytest.mark.parametrize("pkgname, rootname",
+                         [
+                             ("astropy", "astropy"),
+                             ("astropy", "pkgname"),
+                         ])
+def test_write_default_config(tmpdir, pkgname, rootname):
+    with paths.set_temp_config(tmpdir):
+        output = write_default_config(pkgname, rootname=rootname)
+        assert output is not None
+        assert isinstance(output, Path)
+        assert output.exists()
+        assert output.is_file()
+        assert f".{rootname}" in output.parts
+        assert f"{pkgname}.cfg" == output.name
