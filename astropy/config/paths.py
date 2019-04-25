@@ -118,12 +118,12 @@ def get_config_dir(create=False, rootname='astropy'):
     xch = os.environ.get('XDG_CONFIG_HOME')
 
     if xch is not None and os.path.exists(xch):
-        xchpth = os.path.join(xch, rootname)
-        if not os.path.islink(xchpth):
-            if os.path.exists(xchpth):
-                return os.path.abspath(xchpth)
-            else:
-                linkto = xchpth
+        xchpth = os.path.join(xch, rootname)  # pragma: no cover
+        if not os.path.islink(xchpth):  # pragma: no cover
+            if os.path.exists(xchpth):  # pragma: no cover
+                return os.path.abspath(xchpth)  # pragma: no cover
+            else:  # pragma: no cover
+                linkto = xchpth  # pragma: no cover
     return os.path.abspath(_find_or_create_root_dir('config', linkto, rootname, create))
 
 
