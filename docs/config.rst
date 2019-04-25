@@ -13,24 +13,19 @@ The Astropy configuration system is designed to give users control of various
 parameters used in Astropy or affiliated packages without delving into the
 source code to make those changes.
 
-.. note::
-    The configuration system got a major overhaul in ``astropy`` 0.4 as
-    part of APE3. See :ref:`config-0-4-transition` for information
-    about updating code to use the new API.
-
 
 Getting Started
 ===============
 
-The Astropy configuration options are most conveniently set by modifying the
-configuration file. It will be automatically generated with all of the
-default values commented out the first time you import Astropy. You
-can find the exact location by doing::
+The Astropy configuration options are most easily set by modifying the
+configuration file. If you want to modify the configuration file from the
+default you can save the default config to a file::
 
-    >>> from astropy.config import get_config_dir
-    >>> get_config_dir()
+    >>> import astropy
+    >>> astropy.write_default_config()
+    PosixPath('~/.astropy/config/astropy.cfg')
 
-And you should see the location of your configuration directory. The standard
+It should return the location of your configuration directory. The standard
 scheme generally puts your configuration directory in
 ``$HOME/.astropy/config``. It can be customized with the environment variable
 ``XDG_CONFIG_HOME`` and the ``$XDG_CONFIG_HOME/astropy`` directory must exist.
@@ -163,9 +158,9 @@ Upgrading ``astropy``
 Each time you upgrade to a new major version of ``astropy``, the
 configuration parameters may have changed.
 
-If you never edited your configuration file, there is nothing for you
-to do. It will automatically be replaced with a configuration file
-template for the newly installed version of ``astropy``.
+If you never edited your configuration file, there is nothing for you to do. It
+will automatically be replaced with a configuration file template for the newly
+installed version of astropy when running ``astropy.write_default_config()``.
 
 If you did customize your configuration file, it will not be touched.
 Instead, a new configuration file template will be installed alongside
@@ -353,13 +348,83 @@ Or, if the option needs to be available as a function parameter::
         return (conf.some_setting if val is None else val) + 2
 
 
+.. _config-affiliated:
+
+Affiliated Packages
+===================
+
+If you maintain an affiliated package you can customise the behaviour of the
+astropy configuration machinery for your package. Prior to version 4.0 of
+Astropy the bahviour of both ``astropy`` and the package template was to write a
+configuration file to ``~/.astropy/yourpackage.cfg`` if a template configuration
+file was provided by your package. If you wish to maintain this behaviour you do
+not have to change anything.
+
+If you want to change the behaviour of your package to mimic that of ``astropy``
+you can define a wrapper for `astropy.config.write_default_config` in your
+``__init__.py`` file i.e.::
+
+
+  def write_default_config():
+      """
+      Writes out the template configuration file for this version of packagename.
+
+      This function will save a template config file for manual editing, if a
+      config file already exists, this will write a config file appended with the
+      version number, to facilitate comparison of changes.
+
+      Returns
+      -------
+      filepath : `pathlib.Path` or `None`
+          The full path of the file written or `None` if no file was written.
+      """
+      from . import config as _config
+      return _config.write_default_config('packagename')
+
+
+This function provides a way for your users to write out a version of your
+configuration template, in the same way that they are written on import before
+this change.
+
+
+Customizing the Configuration Directory
+---------------------------------------
+
+.. warning::
+
+   If you used the :ref:`package template <packagetemplate:package-template>` to
+   create your affiliated package this might cause you to have to be more
+   careful when pulling in updates from the package template until the template
+   is updated to reflect these changes.
+
+
+Starting with the 4.0 release of astropy it is possible to override the name of
+the directory where the configuration files are stored. Before 4.0 and by
+default this is the ``.astropy`` directory (often ``~/.astropy``). To change
+this you can set the ``rootname=`` keyword in various places. To do this you
+need to make two changes, firstly, you need to add a ``rootname='packagename'``
+argument to the ``_config.write_default_config`` call in the previous example.
+Secondly you need to override the `astropy.config.ConfigItem` class. The best
+way to do that is to define a ``config`` submodule for your package i.e.
+``packagename/config/__init__.py`` would look like this::
+
+  
+  from astropy.config import ConfigNamespace, ConfigItem as _AstropyConfigItem
+
+
+  __all__ = ['ConfigItem', 'ConfigNamespace']
+
+
+  class ConfigItem(_AstropyConfigItem):
+      rootname = 'packagename'
+
+
+You would then import ``ConfigNamespace`` and ``ConfigItem`` from
+``packagename.config``.
+
+
 See Also
 ========
-
-.. toctree::
-   :maxdepth: 2
-
-   config_0_4_transition
 
 :doc:`/logging` (overview of `astropy.logger`)
 

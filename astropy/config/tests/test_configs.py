@@ -5,6 +5,8 @@
 import os
 import sys
 import subprocess
+from pathlib import Path
+from unittest import mock
 
 import pytest
 
@@ -14,11 +16,16 @@ from astropy.utils.data import get_pkg_data_filename
 from astropy.config import configuration
 from astropy.config import paths
 from astropy.utils.exceptions import AstropyDeprecationWarning
+from astropy.config.configuration import get_config, reload_config, write_default_config
+from astropy.extern.configobj import configobj
 
 
 def test_paths():
     assert 'astropy' in paths.get_config_dir()
     assert 'astropy' in paths.get_cache_dir()
+
+    assert 'testpkg' in paths.get_config_dir(rootname='testpkg')
+    assert 'testpkg' in paths.get_cache_dir(rootname='testpkg')
 
 
 def test_set_temp_config(tmpdir, monkeypatch):
@@ -26,7 +33,7 @@ def test_set_temp_config(tmpdir, monkeypatch):
 
     orig_config_dir = paths.get_config_dir()
     temp_config_dir = str(tmpdir.mkdir('config'))
-    temp_astropy_config = os.path.join(temp_config_dir, 'astropy')
+    temp_astropy_config = os.path.join(temp_config_dir, '.astropy')
 
     # Test decorator mode
     @paths.set_temp_config(temp_config_dir)
@@ -35,7 +42,7 @@ def test_set_temp_config(tmpdir, monkeypatch):
 
         # Test temporary restoration of original default
         with paths.set_temp_config() as d:
-            assert d == orig_config_dir == paths.get_config_dir()
+            assert d == orig_config_dir == paths.get_config_dir(rootname='astropy')
 
     test_func()
 
@@ -49,38 +56,66 @@ def test_set_temp_config(tmpdir, monkeypatch):
 def test_set_temp_cache(tmpdir, monkeypatch):
     monkeypatch.setattr(paths.set_temp_cache, '_temp_path', None)
 
-    orig_cache_dir = paths.get_cache_dir()
+    orig_cache_dir = paths.get_cache_dir('astropy')
     temp_cache_dir = str(tmpdir.mkdir('cache'))
     temp_astropy_cache = os.path.join(temp_cache_dir, 'astropy')
 
     # Test decorator mode
     @paths.set_temp_cache(temp_cache_dir)
     def test_func():
-        assert paths.get_cache_dir() == temp_astropy_cache
+        assert paths.get_cache_dir('astropy') == temp_astropy_cache
 
         # Test temporary restoration of original default
         with paths.set_temp_cache() as d:
-            assert d == orig_cache_dir == paths.get_cache_dir()
+            assert d == orig_cache_dir == paths.get_cache_dir('astropy')
 
     test_func()
 
     # Test context manager mode (with cleanup)
     with paths.set_temp_cache(temp_cache_dir, delete=True):
-        assert paths.get_cache_dir() == temp_astropy_cache
+        assert paths.get_cache_dir('astropy') == temp_astropy_cache
 
     assert not os.path.exists(temp_cache_dir)
 
 
-def test_config_file():
-    from astropy.config.configuration import get_config, reload_config
+def get_config_path(*args, **kwargs):
+    """A simple test helper."""
+    cfg = get_config(*args, **kwargs)
+    if isinstance(cfg, configobj.Section):
+        cfg = cfg.parent
+    return Path(cfg.filename)
 
-    apycfg = get_config('astropy')
-    assert apycfg.filename.endswith('astropy.cfg')
+
+def test_config_file():
+    cfg = get_config_path('astropy')
+    assert cfg.name == 'astropy.cfg'
 
     cfgsec = get_config('astropy.config')
     assert cfgsec.depth == 1
     assert cfgsec.name == 'config'
     assert cfgsec.parent.filename.endswith('astropy.cfg')
+
+
+@pytest.mark.parametrize("kwargs, dirname, filename", [
+    ({'packageormod': 'testpkg', 'rootname': 'astropy'},
+     '.astropy',
+     'testpkg.cfg'),
+    ({'packageormod': 'testpkg'},
+     '.astropy',
+     'testpkg.cfg'),
+    ({'packageormod': 'testpkg', 'rootname': 'testpkg'},
+     '.testpkg',
+     'testpkg.cfg'),
+    ({'packageormod': 'testpkg.somemodule', 'rootname': 'testpkg'},
+     '.testpkg',
+     'testpkg.cfg'),
+])
+def test_rootname(kwargs, dirname, filename):
+    # try with a different package name, still inside astropy config dir:
+    cfg = get_config_path(**kwargs)
+    assert dirname in cfg.parts
+    assert cfg.name == filename
+    configuration._cfgobjs['testpkg'] = None  # Clear cache
 
     reload_config('astropy')
 
@@ -190,18 +225,18 @@ def test_config_noastropy_fallback(monkeypatch):
     monkeypatch.delenv(str('XDG_CONFIG_HOME'))
     monkeypatch.setattr(paths.set_temp_config, '_temp_path', None)
 
-    # make sure the _find_or_create_astropy_dir function fails as though the
+    # make sure the _find_or_create_root_dir function fails as though the
     # astropy dir could not be accessed
-    def osraiser(dirnm, linkto):
+    def osraiser(dirnm, linkto, pkgname=None, create=False):
         raise OSError
-    monkeypatch.setattr(paths, '_find_or_create_astropy_dir', osraiser)
+    monkeypatch.setattr(paths, '_find_or_create_root_dir', osraiser)
 
     # also have to make sure the stored configuration objects are cleared
     monkeypatch.setattr(configuration, '_cfgobjs', {})
 
     with pytest.raises(OSError):
         # make sure the config dir search fails
-        paths.get_config_dir()
+        paths.get_config_dir(rootname='astropy')
 
     # now run the basic tests, and make sure the warning about no astropy
     # is present
@@ -352,3 +387,19 @@ def test_unedited_template():
     config_dir = os.path.join(os.path.dirname(__file__), '..', '..')
     configuration.update_default_config('astropy', config_dir)
     assert configuration.update_default_config('astropy', config_dir) is False
+
+
+@pytest.mark.parametrize("pkgname, rootname",
+                         [
+                             ("astropy", "astropy"),
+                             ("astropy", "pkgname"),
+                         ])
+def test_write_default_config(tmpdir, pkgname, rootname):
+    with paths.set_temp_config(tmpdir):
+        output = write_default_config(pkgname, rootname=rootname)
+        assert output is not None
+        assert isinstance(output, Path)
+        assert output.exists()
+        assert output.is_file()
+        assert f".{rootname}" in output.parts
+        assert f"{pkgname}.cfg" == output.name

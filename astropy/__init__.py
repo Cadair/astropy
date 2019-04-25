@@ -24,7 +24,6 @@ else:
 
 import sys
 import os
-from warnings import warn
 
 __minimum_python_version__ = '3.5'
 __minimum_numpy_version__ = '1.13.0'
@@ -210,16 +209,6 @@ def _initialize_astropy():
             # Outright broken installation; don't be nice.
             raise
 
-    # add these here so we only need to cleanup the namespace at the end
-    config_dir = os.path.dirname(__file__)
-
-    try:
-        config.configuration.update_default_config(__package__, config_dir)
-    except config.configuration.ConfigurationDefaultMissingError as e:
-        wmsg = (e.args[0] + " Cannot install default profile. If you are "
-                "importing from source, this is expected.")
-        warn(config.configuration.ConfigurationDefaultMissingWarning(wmsg))
-
 
 def _rebuild_extensions():
     global __version__
@@ -318,9 +307,26 @@ def online_help(query):
     webbrowser.open(url)
 
 
+def write_default_config():
+    """
+    Writes out the template configuration file for this version of astropy.
+
+    This function will save a template config file for manual editing, if a
+    config file already exists, this will write a config file appended with the
+    version number, to facilitate comparison of changes.
+
+    Returns
+    -------
+    filepath : `pathlib.Path` or `None`
+        The full path of the file written or `None` if no file was written.
+    """
+    from . import config as _config
+    return _config.write_default_config('astropy')
+
+
 __dir_inc__ = ['__version__', '__githash__', '__minimum_numpy_version__',
                '__bibtex__', 'test', 'log', 'find_api_page', 'online_help',
-               'online_docs_root', 'conf']
+               'online_docs_root', 'write_default_config', 'conf']
 
 
 from types import ModuleType as __module_type__

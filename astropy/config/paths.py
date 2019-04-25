@@ -71,20 +71,30 @@ def _find_home():
             homedir = os.environ['HOME']
         else:
             raise OSError('Could not find a home directory to search for '
-                          'astropy config dir - are you on an unspported '
+                          'astropy config dir - are you on an unsupported '
                           'platform?')
     return homedir
 
 
-def get_config_dir(create=True):
+def get_config_dir(create=False, rootname='astropy'):
     """
-    Determines the Astropy configuration directory name and creates the
+    Determines the package configuration directory name and creates the
     directory if it doesn't exist.
 
     This directory is typically ``$HOME/.astropy/config``, but if the
     XDG_CONFIG_HOME environment variable is set and the
     ``$XDG_CONFIG_HOME/astropy`` directory exists, it will be that directory.
     If neither exists, the former will be created and symlinked to the latter.
+
+    Parameters
+    ----------
+    rootname : str
+        Name of the root configuration directory. For example, if
+        ``rootname = 'pkgname'``, the configuration directory will be
+        ``<config_dir>/.pkgname/``.
+
+    create : bool, optional
+        Create the path if it doesn't exist.
 
     Returns
     -------
@@ -99,8 +109,8 @@ def get_config_dir(create=True):
     # If using set_temp_config, that overrides all
     if set_temp_config._temp_path is not None:
         xch = set_temp_config._temp_path
-        config_path = os.path.join(xch, 'astropy')
-        if not os.path.exists(config_path):
+        config_path = os.path.join(xch, "." + rootname)
+        if create and not os.path.exists(config_path):
             os.mkdir(config_path)
         return os.path.abspath(config_path)
 
@@ -108,16 +118,16 @@ def get_config_dir(create=True):
     xch = os.environ.get('XDG_CONFIG_HOME')
 
     if xch is not None and os.path.exists(xch):
-        xchpth = os.path.join(xch, 'astropy')
-        if not os.path.islink(xchpth):
-            if os.path.exists(xchpth):
-                return os.path.abspath(xchpth)
-            else:
-                linkto = xchpth
-    return os.path.abspath(_find_or_create_astropy_dir('config', linkto))
+        xchpth = os.path.join(xch, rootname)  # pragma: no cover
+        if not os.path.islink(xchpth):  # pragma: no cover
+            if os.path.exists(xchpth):  # pragma: no cover
+                return os.path.abspath(xchpth)  # pragma: no cover
+            else:  # pragma: no cover
+                linkto = xchpth  # pragma: no cover
+    return os.path.abspath(_find_or_create_root_dir('config', linkto, rootname, create))
 
 
-def get_cache_dir():
+def get_cache_dir(rootname='astropy'):
     """
     Determines the Astropy cache directory name and creates the directory if it
     doesn't exist.
@@ -126,6 +136,13 @@ def get_cache_dir():
     XDG_CACHE_HOME environment variable is set and the
     ``$XDG_CACHE_HOME/astropy`` directory exists, it will be that directory.
     If neither exists, the former will be created and symlinked to the latter.
+
+    Parameters
+    ----------
+    rootname : str
+        Name of the root cache directory. For example, if
+        ``rootname = 'pkgname'``, the cache directory will be
+        ``<cache_dir>/pkgname/``.
 
     Returns
     -------
@@ -140,7 +157,7 @@ def get_cache_dir():
     # If using set_temp_cache, that overrides all
     if set_temp_cache._temp_path is not None:
         xch = set_temp_cache._temp_path
-        cache_path = os.path.join(xch, 'astropy')
+        cache_path = os.path.join(xch, rootname)
         if not os.path.exists(cache_path):
             os.mkdir(cache_path)
         return os.path.abspath(cache_path)
@@ -149,14 +166,14 @@ def get_cache_dir():
     xch = os.environ.get('XDG_CACHE_HOME')
 
     if xch is not None and os.path.exists(xch):
-        xchpth = os.path.join(xch, 'astropy')
+        xchpth = os.path.join(xch, rootname)
         if not os.path.islink(xchpth):
             if os.path.exists(xchpth):
                 return os.path.abspath(xchpth)
             else:
                 linkto = xchpth
 
-    return os.path.abspath(_find_or_create_astropy_dir('cache', linkto))
+    return os.path.abspath(_find_or_create_root_dir('cache', linkto, rootname))
 
 
 class _SetTempPath:
@@ -173,7 +190,7 @@ class _SetTempPath:
 
     def __enter__(self):
         self.__class__._temp_path = self._path
-        return self._default_path_getter()
+        return self._default_path_getter('astropy')
 
     def __exit__(self, *args):
         self.__class__._temp_path = self._prev_path
@@ -269,27 +286,29 @@ class set_temp_cache(_SetTempPath):
     _default_path_getter = staticmethod(get_cache_dir)
 
 
-def _find_or_create_astropy_dir(dirnm, linkto):
-    innerdir = os.path.join(_find_home(), '.astropy')
-    maindir = os.path.join(_find_home(), '.astropy', dirnm)
+def _find_or_create_root_dir(dirnm, linkto, pkgname='astropy', create=True):
+    innerdir = os.path.join(_find_home(), '.{}'.format(pkgname))
+    maindir = os.path.join(_find_home(), '.{}'.format(pkgname), dirnm)
 
     if not os.path.exists(maindir):
         # first create .astropy dir if needed
-        if not os.path.exists(innerdir):
-            try:
-                os.mkdir(innerdir)
-            except OSError:
-                if not os.path.isdir(innerdir):
-                    raise
-        elif not os.path.isdir(innerdir):
-            msg = 'Intended Astropy directory {0} is actually a file.'
-            raise OSError(msg.format(innerdir))
+        if create:
+            if not os.path.exists(innerdir):
+                try:
+                    os.mkdir(innerdir)
+                except OSError:
+                    if not os.path.isdir(innerdir):
+                        raise
+            elif not os.path.isdir(innerdir):
+                msg = 'Intended {0} {1} directory {1} is actually a file.'
+                raise OSError(msg.format(pkgname, dirnm, maindir))
 
-        try:
-            os.mkdir(maindir)
-        except OSError:
-            if not os.path.isdir(maindir):
-                raise
+        if create:
+            try:
+                os.mkdir(maindir)
+            except OSError:
+                if not os.path.isdir(maindir):
+                    raise
 
         if (not sys.platform.startswith('win') and
             linkto is not None and
@@ -297,7 +316,7 @@ def _find_or_create_astropy_dir(dirnm, linkto):
             os.symlink(maindir, linkto)
 
     elif not os.path.isdir(maindir):
-        msg = 'Intended Astropy {0} directory {1} is actually a file.'
-        raise OSError(msg.format(dirnm, maindir))
+        msg = 'Intended {0} {1} directory {1} is actually a file.'
+        raise OSError(msg.format(pkgname, dirnm, maindir))
 
     return os.path.abspath(maindir)

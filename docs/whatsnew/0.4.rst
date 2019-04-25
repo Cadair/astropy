@@ -176,7 +176,7 @@ described in
 `APE3 <https://github.com/astropy/astropy-APEs/blob/master/APE3.rst>`_.
 If you have previously edited the astropy configuration file (typically
 located at ``~/.astropy/config/astropy.cfg``) then you should read over
-:ref:`config-0-4-transition` in order to understand how to update it
+``config-0-4-transition`` in order to understand how to update it
 to the new mechanism.
 
 Deprecation and backward-incompatible changes
