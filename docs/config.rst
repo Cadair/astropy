@@ -356,13 +356,13 @@ Affiliated Packages
 If you maintain an affiliated package you can customise the behaviour of the
 astropy configuration machinery for your package. Prior to version 4.0 of
 Astropy the bahviour of both ``astropy`` and the package template was to write a
-configuration file to `~/.astropy/yourpackage.cfg` if a template configuration
+configuration file to ``~/.astropy/yourpackage.cfg`` if a template configuration
 file was provided by your package. If you wish to maintain this behaviour you do
 not have to change anything.
 
 If you want to change the behaviour of your package to mimic that of ``astropy``
 you can define a wrapper for `astropy.config.write_default_config` in your
-`__init__.py` file i.e.::
+``__init__.py`` file i.e.::
 
 
   def write_default_config():
