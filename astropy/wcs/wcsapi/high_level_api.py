@@ -220,41 +220,75 @@ class HighLevelWCSMixin(BaseHighLevelWCS):
         if self.world_n_dim == 1:
             world = (world,)
 
-        # Cache the classes and components since this may be expensive
-        components = self.low_level_wcs.world_axis_object_components
-        classes = self.low_level_wcs.world_axis_object_classes
-
-        # Deserialize classes
-        if self.low_level_wcs.serialized_classes:
-            classes_new = {}
-            for key, value in classes.items():
-                classes_new[key] = deserialize_class(value, construct=False)
-            classes = classes_new
-
-        args = defaultdict(list)
-        kwargs = defaultdict(dict)
-
-        for i, (key, attr, _) in enumerate(components):
-            if isinstance(attr, str):
-                kwargs[key][attr] = world[i]
-            else:
-                while attr > len(args[key]) - 1:
-                    args[key].append(None)
-                args[key][attr] = world[i]
-
-        result = []
-
-        for key in default_order(components):
-            klass, ar, kw, *rest = classes[key]
-            if len(rest) == 0:
-                klass_gen = klass
-            elif len(rest) == 1:
-                klass_gen = rest[0]
-            else:
-                raise ValueError("Tuples in world_axis_object_classes should have length 3 or 4")
-            result.append(klass_gen(*args[key], *ar, **kwargs[key], **kw))
+        components, classes = get_components_classes(self.low_level_wcs)
+        result = convert_to_rich_objects(components, classes, world)
 
         if len(result) == 1:
             return result[0]
         else:
             return result
+
+
+def get_components_classes(low_level_wcs):
+    """
+    Get the world_axis_object_components and world_axis_object_classes
+    deserializing as needed.
+    """
+    # Cache the classes and components since this may be expensive
+    components = low_level_wcs.world_axis_object_components
+    classes = low_level_wcs.world_axis_object_classes
+
+    # Deserialize classes
+    if low_level_wcs.serialized_classes:
+        classes_new = {}
+        for key, value in classes.items():
+            classes_new[key] = deserialize_class(value, construct=False)
+        classes = classes_new
+
+    return components, classes
+
+
+def convert_to_rich_objects(components, classes, world):
+    args = defaultdict(list)
+    kwargs = defaultdict(dict)
+
+    for i, (key, attr, _) in enumerate(components):
+        if isinstance(attr, str):
+            kwargs[key][attr] = world[i]
+        else:
+            while attr > len(args[key]) - 1:
+                args[key].append(None)
+            args[key][attr] = world[i]
+
+    result = []
+
+    for key in default_order(components):
+        klass, ar, kw, *rest = classes[key]
+        if len(rest) == 0:
+            klass_gen = klass
+        elif len(rest) == 1:
+            klass_gen = rest[0]
+        else:
+            raise ValueError("Tuples in world_axis_object_classes should have length 3 or 4")
+        result.append(klass_gen(*args[key], *ar, **kwargs[key], **kw))
+
+    return result
+
+
+class GlobalCoord(BaseLowLevelWCS):
+    """
+    """
+    def __init__(self, world_info):
+        self.world_info = world_info
+
+    @property
+    def pixel_n_dim(self):
+        return 0
+
+    @property
+    def world_n_dim(self):
+        return len(self.world_info["value"])
+
+    def __getattr__(self, attr):
+        if attr in self.world_info:
+            return self.world_info[attr]
