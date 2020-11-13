@@ -1,6 +1,9 @@
 # NOTE: this Azure configuration is used only for building the sdist and wheels.
 # It uses the OpenAstronomy azure template described in detail at
 # https://openastronomy-azure-pipelines.readthedocs.io/en/latest/
+#
+variables:
+  CI: true
 
 resources:
   repositories:
