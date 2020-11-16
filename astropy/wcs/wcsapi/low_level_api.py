@@ -356,6 +356,6 @@ def validate_physical_types(physical_types):
                 not physical_type.startswith('custom:')):
             raise ValueError(
                 f"'{physical_type}' is not a valid IOVA UCD1+ physical type. "
-                "It must be a string specified in the list (http://www.ivoa.net/documents/latest/UCDlist.html)"
+                "It must be a string specified in the list (http://www.ivoa.net/documents/latest/UCDlist.html) "
                 "or if no matching type exists it can be any string prepended with 'custom:'."
             )
