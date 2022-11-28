@@ -37,13 +37,13 @@ def _expand(params):
     scope="module",
     params=_expand(
         [
-            [((10,),), ((5,), (1,), (3,))],
-            [((12, 12),), ((1, 12), (4, 5), (6, 6))],
-            [((15, 15),), ((1, 15), (5, 1), (5, 5))],
-            [
-                ((15, 15, 15),),
-                ((5, 5, 1), (5, 7, 1), (1, 5, 4), (1, 1, 15), (15, 1, 5)),
-            ],
+            [((100,),), ((50,),)],
+            # [((12, 12),), ((1, 12), (4, 5), (6, 6))],
+            # [((15, 15),), ((1, 15), (5, 1), (5, 5))],
+            # [
+            #     ((15, 15, 15),),
+            #     ((5, 5, 1), (5, 7, 1), (1, 5, 4), (1, 1, 15), (15, 1, 5)),
+            # ],
             # >3D Data are not currently supported with astropy
             # (15, 15, 15, 15),
         ],
@@ -131,18 +131,22 @@ def test_decompress(
         # assert hdul[1].data.dtype.byteorder == np.dtype(dtype).byteorder
     np.testing.assert_allclose(data, base_original_data)
 
+    import gc
 
-def test_compress(
-    astropy_compressed_file_path, base_original_data, compression_type_dtype
-):
-    compression_type, dtype = compression_type_dtype
+    gc.collect()
 
-    fits = fitsio.FITS(astropy_compressed_file_path, "r")
-    header = fits[1].read_header()
-    data = fits[1].read()
 
-    assert header["ZCMPTYPE"] == compression_type
-    assert data.dtype.kind == np.dtype(dtype).kind
-    assert data.dtype.itemsize == np.dtype(dtype).itemsize
-    # assert data.dtype.byteorder == np.dtype(dtype).byteorder
-    np.testing.assert_allclose(data, base_original_data)
+# def test_compress(
+#     astropy_compressed_file_path, base_original_data, compression_type_dtype
+# ):
+#     compression_type, dtype = compression_type_dtype
+
+#     fits = fitsio.FITS(astropy_compressed_file_path, "r")
+#     header = fits[1].read_header()
+#     data = fits[1].read()
+
+#     assert header["ZCMPTYPE"] == compression_type
+#     assert data.dtype.kind == np.dtype(dtype).kind
+#     assert data.dtype.itemsize == np.dtype(dtype).itemsize
+#     # assert data.dtype.byteorder == np.dtype(dtype).byteorder
+#     np.testing.assert_allclose(data, base_original_data)

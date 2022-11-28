@@ -123,6 +123,7 @@ static PyObject *decompress_plio_1_c(PyObject *self, PyObject *args) {
   short *compressed_values;
   int *decompressed_values;
 
+  // Is count some CAPI thing?
   if (!PyArg_ParseTuple(args, "y#i", &str, &count, &tilesize)) {
     return NULL;
   }
@@ -131,9 +132,10 @@ static PyObject *decompress_plio_1_c(PyObject *self, PyObject *args) {
 
   // NOTE: the second *4 shouldn't be needed but ran into segfaults with
   // smaller buffers.
-  decompressed_values = (int *)malloc(tilesize * 4 * 4);
+  decompressed_values = (int *)malloc(sizeof(int) * tilesize);
 
-  pl_l2pi(compressed_values, 1, decompressed_values, (int)count);
+  // Why is it count and not tile size passed in here?
+  pl_l2pi(compressed_values, 0, decompressed_values, (int)count);
 
   buf = (char *)decompressed_values;
 
