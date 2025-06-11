@@ -362,6 +362,7 @@ def parallel_fit_dask(
     preserve_native_chunks=False,
     equivalencies=None,
     fit_info=False,
+    compute=True,
 ):
     """
     Fit a model in parallel to an N-dimensional dataset.
@@ -745,6 +746,18 @@ def parallel_fit_dask(
         fit_info=fit_info,
     )
 
+    if compute is False:
+        return dask.delayed(_dask_parameter_arrays_to_models)(
+            result,
+            model,
+            fit_info,
+            iterating_shape,
+            fitter,
+            original_fit_info,
+            add_back_units,
+            rename_data,
+        )
+
     if scheduler == "default":
         compute_kwargs = {}
     else:
@@ -752,6 +765,28 @@ def parallel_fit_dask(
 
     result_array = result.compute(**compute_kwargs)
 
+    return _dask_parameter_arrays_to_models(
+        result_array,
+        model,
+        fit_info,
+        iterating_shape,
+        fitter,
+        original_fit_info,
+        add_back_units,
+        rename_data,
+    )
+
+
+def _dask_parameter_arrays_to_models(
+    result_array,
+    model,
+    fit_info,
+    iterating_shape,
+    fitter,
+    original_fit_info,
+    add_back_units,
+    rename_data,
+):
     if fit_info:
         parameter_arrays_fitted = result_array[:-1].astype(float)
         fit_info_array = result_array[-1]
